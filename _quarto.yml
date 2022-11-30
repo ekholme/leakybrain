@@ -1,0 +1,38 @@
+project:
+  type: website
+  output-dir: static
+
+website:
+  title: "leakybrain"
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - href: index.qmd
+        text: Home
+      - about.qmd
+      - section: "Go"
+        contents:
+          - go_index.qmd
+      - section: "R"
+        contents:
+          - r_index.qmd
+      - section: "Julia"
+        contents:
+          - julia_index.qmd
+      - section: "Statistics"
+        contents:
+          - stats_index.qmd
+
+
+format:
+  html:
+    theme: simplex
+    css: styles.css
+    toc: true
+
+#freeze computational output
+# see https://quarto.org/docs/projects/code-execution.html#freeze
+freeze: auto
+
+

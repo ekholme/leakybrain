@@ -1,0 +1,5 @@
+*.env
+*.xlsx
+*.csv
+*.xls
+/.quarto/

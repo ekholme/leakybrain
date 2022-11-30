@@ -1,0 +1,44 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site"
+  },
+  {
+    "objectID": "go_index.html",
+    "href": "go_index.html",
+    "title": "Go Placeholder",
+    "section": "",
+    "text": "Some text"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "leakybrain",
+    "section": "",
+    "text": "To learn more about Quarto websites visit https://quarto.org/docs/websites."
+  },
+  {
+    "objectID": "julia_index.html",
+    "href": "julia_index.html",
+    "title": "julia Placeholder",
+    "section": "",
+    "text": "Some text"
+  },
+  {
+    "objectID": "r_index.html",
+    "href": "r_index.html",
+    "title": "R Placeholder",
+    "section": "",
+    "text": "Some text"
+  },
+  {
+    "objectID": "stats_index.html",
+    "href": "stats_index.html",
+    "title": "Stats Placeholder",
+    "section": "",
+    "text": "Some text"
+  }
+]
