@@ -2,6 +2,7 @@
 title: "leakybrain"
 ---
 
-This is a Quarto website.
+Welcome to leakybrain.
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+This is a site I created to drop random snippets of code and take notes related to programming, statistics, and other related topics. It was inspired by Vicki Boykis's [BoringML project](boringml.com).
+

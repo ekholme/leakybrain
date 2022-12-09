@@ -2,9 +2,9 @@
   {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About",
+    "title": "About Me",
     "section": "",
-    "text": "About this site"
+    "text": "Hi, friend. I’m Eric. If you’re interested in learning more about me, you can check out my personal site, where I occassionally blog and post stuff. You can also find me on Github"
   },
   {
     "objectID": "go_index.html",
@@ -18,26 +18,26 @@
     "href": "index.html",
     "title": "leakybrain",
     "section": "",
-    "text": "To learn more about Quarto websites visit https://quarto.org/docs/websites."
+    "text": "This is a site I created to drop random snippets of code and take notes related to programming, statistics, and other related topics. It was inspired by Vicki Boykis’s BoringML project."
   },
   {
     "objectID": "julia_index.html",
     "href": "julia_index.html",
-    "title": "julia Placeholder",
+    "title": "Julia Placeholder",
     "section": "",
     "text": "Some text"
+  },
+  {
+    "objectID": "mle_lm.html",
+    "href": "mle_lm.html",
+    "title": "Maximum Likelihood Estimation - Linear Regression",
+    "section": "",
+    "text": "using Distributions\nusing Random\nusing Optim\nusing GLM\n\nGenerate some fake data\n\nRandom.seed!(0408)\n\n#x data\n𝐗 = hcat(ones(1000), randn(1000, 3))\n\n#ground truth betas\n𝚩 = [.5, 1, 2, 3]\n\n#multiply data by betas\nf₁(X) = X*𝚩\n\n#make some error\nϵ = rand(Normal(0, .5), size(𝐗)[1])\n\n#generate y\ny = f₁(𝐗) + ϵ;\n\nDefine a function to optimize\n\nfunction mle_lm(x, y, params)\n    b = params[begin:end-1]\n    σ = params[end]\n\n    ŷ = x*b\n\n    residuals = y .- ŷ\n\n    ll = -loglikelihood(Normal(0, σ), residuals)\n\n    return ll\nend\n\nmle_lm (generic function with 1 method)\n\n\nRun the optimization\n\nstart_params = [0.2, .5, 1, 1, 1]\n\nres = optimize(params -> mle_lm(𝐗, y, params), start_params)\n\nOptim.minimizer(res)\n\n5-element Vector{Float64}:\n 0.5220526008168841\n 0.9925044101015756\n 1.9951661029827337\n 2.9979617225853903\n 0.5170359122024899\n\n\nCheck against ‘base’ Julia solution\n\n𝐗 \\ y\n\n4-element Vector{Float64}:\n 0.5220524130050495\n 0.9925035386795747\n 1.9951668631756507\n 2.9979619869409357"
   },
   {
     "objectID": "r_index.html",
     "href": "r_index.html",
     "title": "R Placeholder",
-    "section": "",
-    "text": "Some text"
-  },
-  {
-    "objectID": "stats_index.html",
-    "href": "stats_index.html",
-    "title": "Stats Placeholder",
     "section": "",
     "text": "Some text"
   }

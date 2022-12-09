@@ -7,6 +7,10 @@ website:
   sidebar:
     style: "docked"
     search: true
+    collapse-level: 1
+    tools:
+      - icon: github
+        href: https://github.com/ekholme/leakybrain
     contents:
       - href: index.qmd
         text: Home
@@ -22,7 +26,7 @@ website:
           - julia_index.qmd
       - section: "Statistics"
         contents:
-          - stats_index.qmd
+          - mle_lm.qmd
 
 
 format:

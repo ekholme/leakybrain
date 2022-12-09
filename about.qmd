@@ -1,5 +1,5 @@
 ---
-title: "About"
+title: "About Me"
 ---
 
-About this site
+Hi, friend. I'm Eric. If you're interested in learning more about me, you can check out my [personal site](https://ericekholm.com), where I occassionally blog and post stuff. You can also find me on [Github](https://github.com/ekholme)

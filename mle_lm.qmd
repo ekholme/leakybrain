@@ -1,0 +1,73 @@
+---
+title: "Maximum Likelihood Estimation - Linear Regression"
+description: |
+    Illustrated using Julia
+date: "2022-12-9"
+format:
+    html:
+        code-fold: false
+jupyter: julia-1.8
+---
+
+An example of estimating regression coefficients in a linear model via maximum likelihood, using Julia.
+
+```{julia}
+using Distributions
+using Random
+using Optim
+using GLM
+```
+
+Generate some fake data
+
+```{julia}
+Random.seed!(0408)
+
+#x data
+𝐗 = hcat(ones(1000), randn(1000, 3))
+
+#ground truth betas
+𝚩 = [.5, 1, 2, 3]
+
+#multiply data by betas
+f₁(X) = X*𝚩
+
+#make some error
+ϵ = rand(Normal(0, .5), size(𝐗)[1])
+
+#generate y
+y = f₁(𝐗) + ϵ;
+``` 
+
+Define a function to optimize
+
+```{julia}
+function mle_lm(x, y, params)
+    b = params[begin:end-1]
+    σ = params[end]
+
+    ŷ = x*b
+
+    residuals = y .- ŷ
+
+    ll = -loglikelihood(Normal(0, σ), residuals)
+
+    return ll
+end
+```
+
+Run the optimization
+
+```{julia}
+start_params = [0.2, .5, 1, 1, 1]
+
+res = optimize(params -> mle_lm(𝐗, y, params), start_params)
+
+Optim.minimizer(res)
+```
+
+
+Check against 'base' Julia solution
+```{julia}
+𝐗 \ y
+```

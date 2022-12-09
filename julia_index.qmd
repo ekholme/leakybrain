@@ -1,5 +1,5 @@
 ---
-title: "julia Placeholder"
+title: "Julia Placeholder"
 ---
 
 Some text
