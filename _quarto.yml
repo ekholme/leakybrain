@@ -5,28 +5,28 @@ project:
 website:
   title: "leakybrain"
   sidebar:
+    contents: auto
     style: "docked"
     search: true
     collapse-level: 1
     tools:
       - icon: github
         href: https://github.com/ekholme/leakybrain
-    contents:
-      - href: index.qmd
-        text: Home
-      - about.qmd
-      - section: "Go"
-        contents:
-          - go_index.qmd
-      - section: "R"
-        contents:
-          - r_index.qmd
-      - section: "Julia"
-        contents:
-          - julia_index.qmd
-      - section: "Statistics"
-        contents:
-          - mle_lm.qmd
+      # - href: index.qmd
+      #   text: Home
+      # - about.qmd
+      # - section: "Go"
+      #   contents:
+      #     - Go
+      # - section: "R"
+      #   contents:
+      #     - R
+      # - section: "Julia"
+      #   contents:
+      #     - Julia
+      # - section: "Stats"
+      #   contents:
+      #     - auto: Stats
 
 
 format:

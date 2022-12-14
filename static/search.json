@@ -7,8 +7,8 @@
     "text": "Hi, friend. I’m Eric. If you’re interested in learning more about me, you can check out my personal site, where I occassionally blog and post stuff. You can also find me on Github"
   },
   {
-    "objectID": "go_index.html",
-    "href": "go_index.html",
+    "objectID": "Go/go_index.html",
+    "href": "Go/go_index.html",
     "title": "Go Placeholder",
     "section": "",
     "text": "Some text"
@@ -18,27 +18,34 @@
     "href": "index.html",
     "title": "leakybrain",
     "section": "",
-    "text": "This is a site I created to drop random snippets of code and take notes related to programming, statistics, and other related topics. It was inspired by Vicki Boykis’s BoringML project."
+    "text": "Welcome to leakybrain.\nThis is a site I created to drop random snippets of code and take notes related to programming, statistics, and other related topics. It was inspired by Vicki Boykis’s BoringML project."
   },
   {
-    "objectID": "julia_index.html",
-    "href": "julia_index.html",
+    "objectID": "Julia/julia_index.html",
+    "href": "Julia/julia_index.html",
     "title": "Julia Placeholder",
     "section": "",
     "text": "Some text"
   },
   {
-    "objectID": "mle_lm.html",
-    "href": "mle_lm.html",
-    "title": "Maximum Likelihood Estimation - Linear Regression",
-    "section": "",
-    "text": "using Distributions\nusing Random\nusing Optim\nusing GLM\n\nGenerate some fake data\n\nRandom.seed!(0408)\n\n#x data\n𝐗 = hcat(ones(1000), randn(1000, 3))\n\n#ground truth betas\n𝚩 = [.5, 1, 2, 3]\n\n#multiply data by betas\nf₁(X) = X*𝚩\n\n#make some error\nϵ = rand(Normal(0, .5), size(𝐗)[1])\n\n#generate y\ny = f₁(𝐗) + ϵ;\n\nDefine a function to optimize\n\nfunction mle_lm(x, y, params)\n    b = params[begin:end-1]\n    σ = params[end]\n\n    ŷ = x*b\n\n    residuals = y .- ŷ\n\n    ll = -loglikelihood(Normal(0, σ), residuals)\n\n    return ll\nend\n\nmle_lm (generic function with 1 method)\n\n\nRun the optimization\n\nstart_params = [0.2, .5, 1, 1, 1]\n\nres = optimize(params -> mle_lm(𝐗, y, params), start_params)\n\nOptim.minimizer(res)\n\n5-element Vector{Float64}:\n 0.5220526008168841\n 0.9925044101015756\n 1.9951661029827337\n 2.9979617225853903\n 0.5170359122024899\n\n\nCheck against ‘base’ Julia solution\n\n𝐗 \\ y\n\n4-element Vector{Float64}:\n 0.5220524130050495\n 0.9925035386795747\n 1.9951668631756507\n 2.9979619869409357"
-  },
-  {
-    "objectID": "r_index.html",
-    "href": "r_index.html",
+    "objectID": "R/r_index.html",
+    "href": "R/r_index.html",
     "title": "R Placeholder",
     "section": "",
     "text": "Some text"
+  },
+  {
+    "objectID": "Stats/mle_lm.html",
+    "href": "Stats/mle_lm.html",
+    "title": "Maximum Likelihood Estimation - Linear Regression",
+    "section": "",
+    "text": "An example of estimating regression coefficients in a linear model via maximum likelihood, using Julia.\n\nusing Distributions\nusing Random\nusing Optim\nusing GLM\n\nGenerate some fake data\n\nRandom.seed!(0408)\n\n#x data\n𝐗 = hcat(ones(1000), randn(1000, 3))\n\n#ground truth betas\n𝚩 = [.5, 1, 2, 3]\n\n#multiply data by betas\nf₁(X) = X*𝚩\n\n#make some error\nϵ = rand(Normal(0, .5), size(𝐗)[1])\n\n#generate y\ny = f₁(𝐗) + ϵ;\n\nDefine a function to optimize\n\nfunction mle_lm(x, y, params)\n    b = params[begin:end-1]\n    σ = params[end]\n\n    ŷ = x*b\n\n    residuals = y .- ŷ\n\n    ll = -loglikelihood(Normal(0, σ), residuals)\n\n    return ll\nend\n\nmle_lm (generic function with 1 method)\n\n\nRun the optimization\n\nstart_params = [0.2, .5, 1, 1, 1]\n\nres = optimize(params -> mle_lm(𝐗, y, params), start_params)\n\nOptim.minimizer(res)\n\n5-element Vector{Float64}:\n 0.5220526008168841\n 0.9925044101015756\n 1.9951661029827337\n 2.9979617225853903\n 0.5170359122024899\n\n\nCheck against ‘base’ Julia solution\n\n𝐗 \\ y\n\n4-element Vector{Float64}:\n 0.5220524130050495\n 0.9925035386795747\n 1.9951668631756507\n 2.9979619869409357"
+  },
+  {
+    "objectID": "Stats/turing_lm.html",
+    "href": "Stats/turing_lm.html",
+    "title": "Bayesian Linear Regression",
+    "section": "",
+    "text": "An example of using Bayesian methods (via Julia’s Turing.jl) to estimate a linear regression\n\nLoad Packages\n\nusing Turing\nusing Random\nusing Distributions\nusing LinearAlgebra\nusing Plots\nusing StatsPlots\n\n\n\nGenerate some fake data\n\nRandom.seed!(0408)\n\nn = 1000\n\n𝐗 = randn(n, 3)\n\nβ = [1., 2., 3.]\n\nf(x) = .5 .+ x*β\n\nϵ = rand(Normal(0, .2), n)\n\ny = f(𝐗) + ϵ;\n\n\n\nDefine a Model\n\n@model function linear_regression(x, y)\n    #housekeeping\n    n_feat = size(x, 2)\n    \n    #priors\n    α ~ Normal(0, 2)\n    σ ~ Exponential(1)\n    b ~ MvNormal(zeros(n_feat), 5 * I)\n\n    #likelihood\n    for i ∈ eachindex(y)\n        y[i] ~ Normal(α + x[i,:]' * b, σ)\n    end\nend\n\nlinear_regression (generic function with 2 methods)\n\n\n\n\nCompute Posterior\n\nmodel = linear_regression(𝐗, y)\n\nchn = sample(model, NUTS(), MCMCThreads(), 1_000, 2);\n\n\n\nPlot Parameter Posteriors\n\nplot(chn)\n\n\n\n\n\n\nPredict Values of Y\n\npred_mod = linear_regression(\n    𝐗, \n    Vector{Union{Missing, Float64}}(undef, length(y))\n)\n\npreds = predict(pred_mod, chn);\n\n#to get summary statistics\nsummarize(preds)\n\n\nSummary Statistics\n  parameters      mean       std   naive_se      mcse         ess      rhat \n      Symbol   Float64   Float64    Float64   Float64     Float64   Float64 \n        y[1]    5.6876    0.2120     0.0047    0.0040   2131.4185    1.0007\n        y[2]   -1.0132    0.2088     0.0047    0.0050   2045.6712    1.0004\n        y[3]   -3.1168    0.2059     0.0046    0.0039   2026.1454    0.9993\n        y[4]    4.5125    0.2042     0.0046    0.0047   1994.3306    0.9997\n        y[5]    2.6687    0.2041     0.0046    0.0036   2064.6256    0.9991\n        y[6]   -1.2255    0.2080     0.0047    0.0049   1836.3394    0.9993\n        y[7]    2.3067    0.2054     0.0046    0.0039   2075.1743    1.0003\n        y[8]    1.1287    0.2042     0.0046    0.0039   1929.8026    0.9999\n        y[9]    0.4400    0.2061     0.0046    0.0041   2109.2564    0.9996\n       y[10]    6.7965    0.2053     0.0046    0.0047   1746.0770    1.0008\n       y[11]   -3.7930    0.2034     0.0045    0.0048   1820.9121    0.9993\n       y[12]    0.4814    0.2053     0.0046    0.0046   1868.2305    0.9996\n       y[13]    2.4322    0.2068     0.0046    0.0045   1941.8888    0.9993\n       y[14]    0.3437    0.2071     0.0046    0.0048   1761.8573    1.0017\n       y[15]   -0.7060    0.2091     0.0047    0.0046   2053.6154    1.0004\n       y[16]    0.3729    0.2086     0.0047    0.0048   1927.2731    0.9993\n       y[17]    1.8546    0.2099     0.0047    0.0047   1810.0899    0.9996\n       y[18]    2.2985    0.2073     0.0046    0.0045   1978.9502    0.9994\n       y[19]   -0.8137    0.2073     0.0046    0.0047   2090.7345    0.9995\n       y[20]    4.8043    0.2024     0.0045    0.0048   1878.8739    0.9993\n       y[21]    3.7083    0.2100     0.0047    0.0052   1885.7547    0.9996\n       y[22]    0.2769    0.2095     0.0047    0.0036   1944.5012    0.9996\n       y[23]   -3.4487    0.2122     0.0047    0.0054   2100.7819    1.0001\n      ⋮           ⋮         ⋮         ⋮          ⋮          ⋮          ⋮\n                                                             977 rows omitted\n\n\n\n\nPlot posterior distribution(s) of the predictions for the first observation:\n\ny_1 = getindex(preds, \"y[1]\")\n\ndensity(y_1.data)\n\n\n\n\nAnd to get mean predicted values for each observation of y:\n\nmean_preds = summarize(preds)[:, 2]\n\n1000-element Vector{Float64}:\n  5.687584896870903\n -1.0131932466821032\n -3.116780621735853\n  4.512509987465371\n  2.6687246425133946\n -1.2254837248151988\n  2.306673192525782\n  1.1286618139435005\n  0.44000862835633064\n  6.79652703562579\n -3.79298730457439\n  0.48144060256761656\n  2.4321882922004816\n  ⋮\n -3.662775430736099\n  0.7859815782511625\n -3.5565609003804592\n -0.9696845244200145\n  0.82043625177212\n  4.348165410409958\n  1.9125271244452688\n  1.072526007780797\n -7.133862685203614\n -6.206271121676054\n -7.631370737446044\n  0.7668219857089003"
   }
 ]
