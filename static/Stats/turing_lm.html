@@ -190,7 +190,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../Julia/julia_index.html" class="sidebar-item-text sidebar-link">Julia Placeholder</a>
+  <a href="../Julia/julia_pkg_init.html" class="sidebar-item-text sidebar-link">Julia Package Initialization</a>
   </div>
 </li>
       </ul>
@@ -240,11 +240,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
    
   <ul>
   <li><a href="#load-packages" id="toc-load-packages" class="nav-link active" data-scroll-target="#load-packages">Load Packages</a></li>
-  <li><a href="#generate-some-fake-data" id="toc-generate-some-fake-data" class="nav-link" data-scroll-target="#generate-some-fake-data">Generate some fake data</a></li>
-  <li><a href="#define-a-model" id="toc-define-a-model" class="nav-link" data-scroll-target="#define-a-model">Define a Model</a></li>
-  <li><a href="#compute-posterior" id="toc-compute-posterior" class="nav-link" data-scroll-target="#compute-posterior">Compute Posterior</a></li>
-  <li><a href="#plot-parameter-posteriors" id="toc-plot-parameter-posteriors" class="nav-link" data-scroll-target="#plot-parameter-posteriors">Plot Parameter Posteriors</a></li>
-  <li><a href="#predict-values-of-y" id="toc-predict-values-of-y" class="nav-link" data-scroll-target="#predict-values-of-y">Predict Values of Y</a></li>
   </ul>
 </nav>
     </div>
@@ -290,9 +285,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Plots</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">StatsPlots</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section>
-<section id="generate-some-fake-data" class="level1">
-<h1>Generate some fake data</h1>
+<p>Generate some fake data</p>
 <div class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">Random</span>.<span class="fu">seed!</span>(<span class="fl">0408</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -308,9 +301,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> <span class="fu">f</span>(𝐗) <span class="op">+</span> ϵ;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section>
-<section id="define-a-model" class="level1">
-<h1>Define a Model</h1>
+<p>Define a Model</p>
 <div class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@model</span> <span class="kw">function</span> <span class="fu">linear_regression</span>(x, y)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">#housekeeping</span></span>
@@ -330,26 +321,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <pre><code>linear_regression (generic function with 2 methods)</code></pre>
 </div>
 </div>
-</section>
-<section id="compute-posterior" class="level1">
-<h1>Compute Posterior</h1>
+<p>Compute Posterior</p>
 <div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> <span class="fu">linear_regression</span>(𝐗, y)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>chn <span class="op">=</span> <span class="fu">sample</span>(model, <span class="fu">NUTS</span>(), <span class="fu">MCMCThreads</span>(), <span class="fl">1_000</span>, <span class="fl">2</span>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section>
-<section id="plot-parameter-posteriors" class="level1">
-<h1>Plot Parameter Posteriors</h1>
+<p>Plot Parameter Posteriors</p>
 <div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(chn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <p><img src="turing_lm_files/figure-html/cell-6-output-1.svg" class="img-fluid"></p>
 </div>
 </div>
-</section>
-<section id="predict-values-of-y" class="level1">
-<h1>Predict Values of Y</h1>
+<p>Predict Values of Y</p>
 <div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>pred_mod <span class="op">=</span> <span class="fu">linear_regression</span>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    𝐗, </span>

@@ -1,0 +1,40 @@
+---
+title: "Julia Package Initialization"
+---
+
+Creating a new Julia package is easiest if you create `whatever.jl` script to help establish the template, e.g.
+
+```bash
+cd some/path
+touch whatever.jl
+```
+
+Then open this with VSCode. Once in VSCode, open the terminal and install `PkgTemplates.jl` if it's not already installed:
+
+```julia
+]
+add PkgTemplates
+```
+
+Then create a template with the options you want in your new package. The way I currently do this is:
+
+```julia
+using PkgTemplates
+
+t = Template(;
+    user = "ekholme", #or your git user.name
+    license = "MIT",
+    authors = ["Eric Ekholm"],
+    julia_version = v"1.8", #or w/e version you want
+    plugins = [
+        GitHubActions(),
+        Codecov(),
+        GitHubPages(),
+        TravisCI()
+    ]
+)
+
+t("MyPkgName")
+```
+
+And then running this will create a new package (and set up all of your Git stuff if it's already configured)

@@ -12,23 +12,6 @@ website:
     tools:
       - icon: github
         href: https://github.com/ekholme/leakybrain
-      # - href: index.qmd
-      #   text: Home
-      # - about.qmd
-      # - section: "Go"
-      #   contents:
-      #     - Go
-      # - section: "R"
-      #   contents:
-      #     - R
-      # - section: "Julia"
-      #   contents:
-      #     - Julia
-      # - section: "Stats"
-      #   contents:
-      #     - auto: Stats
-
-
 format:
   html:
     theme: simplex

@@ -23,7 +23,7 @@ using StatsPlots
 
 ```
 
-# Generate some fake data
+Generate some fake data
 
 ```{julia}
 Random.seed!(0408)
@@ -42,7 +42,7 @@ y = f(𝐗) + ϵ;
 
 ```
 
-# Define a Model
+Define a Model
 
 ```{julia}
 @model function linear_regression(x, y)
@@ -63,7 +63,7 @@ end
 
 ```
 
-# Compute Posterior
+Compute Posterior
 
 ```{julia}
 #|warning: false
@@ -73,13 +73,13 @@ chn = sample(model, NUTS(), MCMCThreads(), 1_000, 2);
 
 ```
 
-# Plot Parameter Posteriors
+Plot Parameter Posteriors
 
 ```{julia}
 plot(chn)
 ```
 
-# Predict Values of Y
+Predict Values of Y
 
 ```{julia}
 pred_mod = linear_regression(
