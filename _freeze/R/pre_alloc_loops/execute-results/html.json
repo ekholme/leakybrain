@@ -1,0 +1,14 @@
+{
+  "hash": "66e9acddfeb31bd00503838db5d1a05e",
+  "result": {
+    "markdown": "---\ntitle: \"Pre-Allocating to Improve For Loops\"\ndate: \"2023-01-19\"\nformat:\n    html:\n        code-fold: false\n---\n\n\nHow to pre-allocate vectors used in your `for` loops in `R` to make your code run faster and perform fewer allocations.\n\nFirst, set `n` to be the size of the vector we want to work with\n\n\n::: {.cell}\n\n```{.r .cell-code}\nn <- 1e6\n```\n:::\n\n\nThen set up a function that doesn't pre-allocate a list\n\n\n::: {.cell}\n\n```{.r .cell-code}\nno_alloc <- function(n) {\n\n    x <- list()\n\n    for (i in seq_len(n)) {\n        x[[i]] <- i\n    }\n\n    x\n}\n```\n:::\n\n\nThen set up a function that does pre-allocate a list\n\n\n::: {.cell}\n\n```{.r .cell-code}\npre_alloc <- function(n) {\n    \n    x <- vector(mode = \"list\", length = n)\n\n    for (i in seq_len(n)) {\n        x[[i]] <- i\n    }\n    \n    x\n}\n```\n:::\n\n\nAnd compare the benchmarks for these functions\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(bench)\n```\n\n::: {.cell-output .cell-output-stderr}\n```\nWarning: package 'bench' was built under R version 4.2.2\n```\n:::\n\n```{.r .cell-code}\nres <- bench::mark(\n    no_alloc(n),\n    pre_alloc(n)\n)\n```\n\n::: {.cell-output .cell-output-stderr}\n```\nWarning: Some expressions had a GC in every iteration; so filtering is disabled.\n```\n:::\n\n```{.r .cell-code}\nres[c(\"expression\", \"min\", \"median\", \"itr/sec\", \"n_gc\")]\n```\n\n::: {.cell-output .cell-output-stdout}\n```\n# A tibble: 2 × 4\n  expression        min   median `itr/sec`\n  <bch:expr>   <bch:tm> <bch:tm>     <dbl>\n1 no_alloc(n)   632.2ms  632.2ms      1.58\n2 pre_alloc(n)   56.5ms   74.4ms     12.7 \n```\n:::\n:::\n\n\nWe can see that pre-allocating is the way to go!",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

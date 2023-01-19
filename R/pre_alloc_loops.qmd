@@ -1,0 +1,60 @@
+---
+title: "Pre-Allocating to Improve For Loops"
+date: "2023-01-19"
+format:
+    html:
+        code-fold: false
+---
+
+How to pre-allocate vectors used in your `for` loops in `R` to make your code run faster and perform fewer allocations.
+
+First, set `n` to be the size of the vector we want to work with
+
+```{r}
+n <- 1e6
+```
+
+Then set up a function that doesn't pre-allocate a list
+
+```{r}
+no_alloc <- function(n) {
+
+    x <- list()
+
+    for (i in seq_len(n)) {
+        x[[i]] <- i
+    }
+
+    x
+}
+```
+
+Then set up a function that does pre-allocate a list
+
+```{r}
+pre_alloc <- function(n) {
+    
+    x <- vector(mode = "list", length = n)
+
+    for (i in seq_len(n)) {
+        x[[i]] <- i
+    }
+    
+    x
+}
+```
+
+And compare the benchmarks for these functions
+
+```{r}
+library(bench)
+
+res <- bench::mark(
+    no_alloc(n),
+    pre_alloc(n)
+)
+
+res[c("expression", "min", "median", "itr/sec", "n_gc")]
+```
+
+We can see that pre-allocating is the way to go!

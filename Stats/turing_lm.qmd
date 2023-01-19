@@ -11,7 +11,7 @@ jupyter: julia-1.8
 
 An example of using Bayesian methods (via Julia's `Turing.jl`) to estimate a linear regression
 
-# Load Packages
+Load Packages
 
 ```{julia}
 using Turing
