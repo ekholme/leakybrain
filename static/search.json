@@ -7,11 +7,39 @@
     "text": "Hi, friend. I’m Eric. If you’re interested in learning more about me, you can check out my personal site, where I occassionally blog and post stuff. You can also find me on Github"
   },
   {
-    "objectID": "Go/go_index.html",
-    "href": "Go/go_index.html",
-    "title": "Go Placeholder",
+    "objectID": "Go/interface_composition.html",
+    "href": "Go/interface_composition.html",
+    "title": "Interface Composition",
     "section": "",
-    "text": "Some text"
+    "text": "One cool feature of Go is that it lets you compose interfaces using other interfaces. The prototypical example of this is the ReadWriter, which is composed of the Reader interface and the Writer interface.\nBelow is an example of a toy program that defines a UserStorer interface and an ItemStorer interface, then a Storer interface that is composed of these interfaces"
+  },
+  {
+    "objectID": "Go/interface_composition.html#define-user-stuff",
+    "href": "Go/interface_composition.html#define-user-stuff",
+    "title": "Interface Composition",
+    "section": "Define User Stuff",
+    "text": "Define User Stuff\npackage main\n\nimport (\n    \"encoding/json\"\n    \"fmt\"\n)\n\n//create type\ntype User struct {\n    Name string\n    Age  int\n}\n\n//create interface\ntype UserStorer interface {\n    AddUser(users []*User, user *User) []*User\n}\n\n//define an empty struct that will implement interface\ntype ustore struct{}\n\n//constructor\nfunc NewUserStore() UserStorer {\n    return &ustore{}\n}\n\nfunc (us ustore) AddUser(users []*User, user *User) []*User {\n\n    users = append(users, user)\n\n    return users\n}"
+  },
+  {
+    "objectID": "Go/interface_composition.html#define-item-stuff",
+    "href": "Go/interface_composition.html#define-item-stuff",
+    "title": "Interface Composition",
+    "section": "Define Item Stuff",
+    "text": "Define Item Stuff\n//define type\ntype Item struct {\n    Name  string\n    Usage string\n}\n\n//define interface\ntype ItemStorer interface {\n    AddItem(items []*Item, item *Item) []*Item\n}\n\n//define empty struct that will implement interface\ntype istore struct{}\n\n//define constructor\nfunc NewItemStore() ItemStorer {\n    return &istore{}\n}\n\n//define add method\nfunc (is istore) AddItem(items []*Item, item *Item) []*Item {\n\n    items = append(items, item)\n\n    return items\n}"
+  },
+  {
+    "objectID": "Go/interface_composition.html#define-storer-stuff",
+    "href": "Go/interface_composition.html#define-storer-stuff",
+    "title": "Interface Composition",
+    "section": "Define Storer Stuff",
+    "text": "Define Storer Stuff\ntype Storer interface {\n    UserStorer\n    ItemStorer\n}\n\ntype myStore struct {\n    UserStorer\n    ItemStorer\n}\n\nfunc NewStorer(us UserStorer, is ItemStorer) Storer {\n\n    s := &myStore{\n        UserStorer: us,\n        ItemStorer: is,\n    }\n\n    return s\n}"
+  },
+  {
+    "objectID": "Go/interface_composition.html#create-simple-program",
+    "href": "Go/interface_composition.html#create-simple-program",
+    "title": "Interface Composition",
+    "section": "Create Simple Program",
+    "text": "Create Simple Program\nfunc main() {\n\n    us := NewUserStore()\n    is := NewItemStore()\n\n    s := NewStorer(us, is)\n\n    var items []*Item\n    var users []*User\n\n    u := &User{\n        Name: \"Eric\",\n        Age:  34,\n    }\n\n    i := &Item{\n        Name:  \"Phone\",\n        Usage: \"texting\",\n    }\n\n    items = s.AddItem(items, i)\n    users = s.AddUser(users, u)\n\n    //embed to json\n    ji, _ := json.Marshal(items)\n    ju, _ := json.Marshal(users)\n\n    //print out results\n    fmt.Println(string(ji))\n    fmt.Println(string(ju))\n}"
   },
   {
     "objectID": "index.html",

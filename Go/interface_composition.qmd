@@ -1,0 +1,143 @@
+---
+title: "Interface Composition"
+description: |
+    Demonstrating Interface Composition in Go
+date: "2023-03-09"
+format:
+    html:
+        code-fold: false
+---
+
+One cool feature of Go is that it lets you compose interfaces using other interfaces. The prototypical example of this is the [ReadWriter](https://pkg.go.dev/io#ReadWriter), which is composed of the Reader interface and the Writer interface.
+
+Below is an example of a toy program that defines a UserStorer interface and an ItemStorer interface, then a Storer interface that is composed of these interfaces
+
+## Define User Stuff
+
+``` go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+//create type
+type User struct {
+	Name string
+	Age  int
+}
+
+//create interface
+type UserStorer interface {
+	AddUser(users []*User, user *User) []*User
+}
+
+//define an empty struct that will implement interface
+type ustore struct{}
+
+//constructor
+func NewUserStore() UserStorer {
+	return &ustore{}
+}
+
+func (us ustore) AddUser(users []*User, user *User) []*User {
+
+	users = append(users, user)
+
+	return users
+}
+
+```
+
+## Define Item Stuff
+
+``` go
+//define type
+type Item struct {
+	Name  string
+	Usage string
+}
+
+//define interface
+type ItemStorer interface {
+	AddItem(items []*Item, item *Item) []*Item
+}
+
+//define empty struct that will implement interface
+type istore struct{}
+
+//define constructor
+func NewItemStore() ItemStorer {
+	return &istore{}
+}
+
+//define add method
+func (is istore) AddItem(items []*Item, item *Item) []*Item {
+
+	items = append(items, item)
+
+	return items
+}
+```
+
+## Define Storer Stuff
+
+``` go
+type Storer interface {
+	UserStorer
+	ItemStorer
+}
+
+type myStore struct {
+	UserStorer
+	ItemStorer
+}
+
+func NewStorer(us UserStorer, is ItemStorer) Storer {
+
+	s := &myStore{
+		UserStorer: us,
+		ItemStorer: is,
+	}
+
+	return s
+}
+```
+
+## Create Simple Program
+
+``` go
+func main() {
+
+	us := NewUserStore()
+	is := NewItemStore()
+
+	s := NewStorer(us, is)
+
+	var items []*Item
+	var users []*User
+
+	u := &User{
+		Name: "Eric",
+		Age:  34,
+	}
+
+	i := &Item{
+		Name:  "Phone",
+		Usage: "texting",
+	}
+
+	items = s.AddItem(items, i)
+	users = s.AddUser(users, u)
+
+	//embed to json
+	ji, _ := json.Marshal(items)
+	ju, _ := json.Marshal(users)
+
+    //print out results
+	fmt.Println(string(ji))
+	fmt.Println(string(ju))
+}
+
+```
