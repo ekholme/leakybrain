@@ -1,0 +1,11 @@
+{
+  "hash": "478e6187a84ae652a0ab6608b7e60991",
+  "result": {
+    "markdown": "---\ntitle: venvs in Python\ndescription: |\n  How to create and activate a virtual environment\ndate: '2023-04-14'\nformat:\n  html:\n    code-fold: false\n---\n\nTo create a venv:\n\n```bash\npython3.11 -m venv ./venv\n```\n\nand to activate it:\n\n```bash\nsource venv/bin/activate\n```\n\net voila\n\n",
+    "supporting": [
+      "venv_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

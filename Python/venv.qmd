@@ -1,0 +1,24 @@
+---
+title: "venvs in Python"
+description: |
+    How to create and activate a virtual environment
+date: "2023-04-14"
+format:
+    html:
+        code-fold: false
+jupyter: python3
+---
+
+To create a venv:
+
+```bash
+python3.11 -m venv ./venv
+```
+
+and to activate it:
+
+```bash
+source venv/bin/activate
+```
+
+et voila
