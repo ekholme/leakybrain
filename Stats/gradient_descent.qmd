@@ -47,8 +47,6 @@ Mean squared error is the most straightforward
 
 ```{julia}
 function mse_loss(X, y, b)
-    n = length(y)
-
     ŷ = X*b
 
     l = mean((y .- ŷ).^2)
@@ -68,7 +66,7 @@ This implements the gradient descent algorithm:
 - define a loop that updates the beta values by the learning rate * the gradients until convergence
 
 ```{julia}
-function grad_descent(X, y; lr = .01, tol = .01, max_iter = 1_000)
+function grad_descent(X, y; lr = .01, tol = .01, max_iter = 1_000, noisy = false)
    #randomly initialize betas
    β = rand(size(X)[2])
    
@@ -84,7 +82,9 @@ function grad_descent(X, y; lr = .01, tol = .01, max_iter = 1_000)
     while err > tol && iter < max_iter
         β -= lr*d(β)
         err = mse_loss(X, y, β)
-        println("Iteration $(iter): current error is $(err)")
+        if (noisy == true)
+            println("Iteration $(iter): current error is $(err)")
+        end
         iter += 1
     end
     return β
