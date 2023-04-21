@@ -1,0 +1,108 @@
+---
+title: "Gradient Descent"
+description: |
+    Illustrated using Julia
+date: "2023-04-21"
+format:
+    html:
+        code-fold: false
+jupyter: julia-1.8
+---
+
+An example of estimating linear regression beta coefficients via gradient descent, using Julia.
+
+```{julia}
+using Random
+using GLM
+using ForwardDiff
+using Statistics
+```
+
+# Generate Data
+
+First, we generate some fake data
+
+```{julia}
+Random.seed!(0408)
+
+#x data
+𝐗 = hcat(ones(1000), randn(1000, 3))
+
+#ground truth betas
+𝚩 = [.5, 1, 2, 3]
+
+#multiply data by betas
+f₁(X) = X*𝚩
+
+#make some error
+ϵ = rand(Normal(0, .5), size(𝐗)[1])
+
+#generate y
+y = f₁(𝐗) + ϵ;
+``` 
+
+# Define a Loss Function
+
+Mean squared error is the most straightforward
+
+```{julia}
+function mse_loss(X, y, b)
+    n = length(y)
+
+    ŷ = X*b
+
+    l = mean((y .- ŷ).^2)
+
+    return l
+end
+```
+
+# Define a training function
+
+This implements the gradient descent algorithm:
+
+- initialize some random beta values
+- initialize error as some very large number (the init value doesn't really matter as long as it's greater than the function's `tol` parameter)
+- initialize the number of iterations (`iter`) at 0
+- define a function `d()` to get the gradient of the loss function at a given set of betas
+- define a loop that updates the beta values by the learning rate * the gradients until convergence
+
+```{julia}
+function grad_descent(X, y; lr = .01, tol = .01, max_iter = 1_000)
+   #randomly initialize betas
+   β = rand(size(X)[2])
+   
+    #init error to something large
+    err = 1e10
+
+    #initialize iterations at 0
+    iter = 0
+
+    #define a function to get the gradient of the loss function at a given set of betas
+    d(b) = ForwardDiff.gradient(params -> mse_loss(X, y, params), b)
+
+    while err > tol && iter < max_iter
+        β -= lr*d(β)
+        err = mse_loss(X, y, β)
+        println("Iteration $(iter): current error is $(err)")
+        iter += 1
+    end
+    return β
+end
+```
+
+# Estimate βs
+
+To estimate the betas, we just run the function
+
+```{julia}
+b = grad_descent(𝐗, y)
+```
+
+# Check Solution Against Base Julia Solver
+
+```{julia}
+𝐗 \ y .≈ b
+```
+
+huzzah!
