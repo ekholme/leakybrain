@@ -13,8 +13,8 @@ An example of estimating linear regression beta coefficients via gradient descen
 
 ```{julia}
 using Random
-using GLM
 using ForwardDiff
+using Distributions
 using Statistics
 ```
 
