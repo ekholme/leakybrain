@@ -42,6 +42,13 @@
     "text": "Create Simple Program\nfunc main() {\n\n    us := NewUserStore()\n    is := NewItemStore()\n\n    s := NewStorer(us, is)\n\n    var items []*Item\n    var users []*User\n\n    u := &User{\n        Name: \"Eric\",\n        Age:  34,\n    }\n\n    i := &Item{\n        Name:  \"Phone\",\n        Usage: \"texting\",\n    }\n\n    items = s.AddItem(items, i)\n    users = s.AddUser(users, u)\n\n    //embed to json\n    ji, _ := json.Marshal(items)\n    ju, _ := json.Marshal(users)\n\n    //print out results\n    fmt.Println(string(ji))\n    fmt.Println(string(ju))\n}"
   },
   {
+    "objectID": "Go/post_request_validation.html",
+    "href": "Go/post_request_validation.html",
+    "title": "Validating Post Requests",
+    "section": "",
+    "text": "This is a pretty small example of how to validate a post request in Go. It’s not at all difficult, but I’m writing this because I often forget to do this, and I’m hoping that writing it will make me remember.\npackage main\n\nimport (\n    \"encoding/json\"\n    \"fmt\"\n    \"log\"\n    \"net/http\"\n\n    \"github.com/go-playground/validator\"\n)\n\nconst (\n    listenAddr string = \":8080\"\n)\n\n//when defining the struct, be sure to indicate validation requirements\n//you can also do something like validate:\"required,email\" to check that the input is an email\ntype User struct {\n    FirstName string `json:\"firstName\" validate:\"required\"`\n    LastName  string `json:\"lastName\" validate:\"required\"`\n}\n\nfunc handleIndex(w http.ResponseWriter, r *http.Request) {\n\n    switch r.Method {\n    case http.MethodGet:\n        msg := \"hello, world\"\n\n        w.WriteHeader(http.StatusOK)\n\n        w.Write([]byte(msg))\n\n    case http.MethodPost:\n        var u *User\n\n        //create a new instance of a validator\n        validate := validator.New()\n\n        json.NewDecoder(r.Body).Decode(&u)\n\n        //validate the struct\n        err := validate.Struct(u)\n\n        if err != nil {\n            http.Error(w, \"invalid request\", http.StatusBadRequest)\n            return\n        }\n\n        msg := \"hello, \" + u.FirstName + \" \" + u.LastName\n\n        w.WriteHeader(http.StatusOK)\n\n        w.Write([]byte(msg))\n    default:\n        http.Error(w, \"method not allowed\", http.StatusMethodNotAllowed)\n    }\n}\n\nfunc main() {\n    r := http.NewServeMux()\n\n    r.HandleFunc(\"/\", handleIndex)\n\n    fmt.Println(\"Running server\")\n\n    err := http.ListenAndServe(listenAddr, r)\n\n    log.Fatal(err)\n}"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "leakybrain",
