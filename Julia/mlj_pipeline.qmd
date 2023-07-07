@@ -1,0 +1,72 @@
+---
+title: "MLJ Pipeline"
+description: |
+  A minimal machine learning pipeline using Julia's MLJ framework
+date: 2023-07-07
+format:
+  html:
+    code-fold: false
+jupyter: julia-1.9
+---
+
+Below is a minimal (yet complete) example of a machine learning pipeline that use's Julia's [MLJ](https://alan-turing-institute.github.io/MLJ.jl/dev/) framework and the [Palmer Penguins dataset](https://allisonhorst.github.io/palmerpenguins/).
+
+Note that the goal here isn't necessarily to fit the best model; rather it's just to demonstrate an MLJ pipeline.
+
+```{julia}
+using DataFrames
+using CSV
+using Random
+using MLJ
+
+Random.seed!(0408)
+
+#get penguins data
+penguins = CSV.read(download("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv"), DataFrame, missingstring="NA")
+
+#filter to those without missing body mass
+dropmissing!(penguins, :body_mass_g)
+
+#extract body mass as y
+y, X = unpack(penguins, ==(:body_mass_g))
+
+# coercing textual columns to multiclass for modeling
+coerce_nms = [:species, :sex, :island]
+
+c_dict = Dict(zip(coerce_nms, repeat([Multiclass], 3)))
+
+coerce!(
+    X,
+    c_dict
+)
+
+#get training and validation indices
+trn, val = partition(eachindex(y), 0.8; shuffle=true)
+
+#define pipeline components
+imp = FillImputer();
+stand = Standardizer();
+oh = OneHotEncoder(drop_last=true);
+LinearRegression = @load LinearRegressor pkg = GLM add = true
+mod = LinearRegression()
+
+#define pipeline
+m = Pipeline(imp, stand, oh, mod)
+
+#define machine
+mach = machine(m, X, y);
+
+#fit machine on training rows
+fit!(mach, rows=trn)
+
+#predicting training y's
+ŷ = MLJ.predict_mean(mach, X[trn, :])
+
+#evaluate model
+cv = CV(nfolds=3)
+
+MLJ.evaluate!(mach, rows=val, resampling=cv, measure=rmse)
+
+#note -- call measures() to see all available measures
+
+```
