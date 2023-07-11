@@ -1,0 +1,87 @@
+---
+title: "Scikit-Learn Pipeline"
+description: |
+  A minimal machine learning pipeline using Python and sklearn
+date: 2023-07-11
+format:
+  html:
+    code-fold: false
+jupyter: python3
+---
+
+Below is a minimal (yet complete) example of a machine learning pipeline using python and [scikit-learn](https://scikit-learn.org/stable/) and the [Palmer Penguins dataset](https://allisonhorst.github.io/palmerpenguins/).
+
+Note that the goal here isn't necessarily to fit the best model; rather it's just to demonstrate an sklearn pipeline. Also note that I wouldn't call myself an expert python programmer, so there may be better/more efficient ways to do this.
+
+```{python}
+import polars as pl
+import numpy as np
+import math
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LinearRegression
+from sklearn.compose import ColumnTransformer
+from sklearn.metrics import mean_squared_error
+
+penguins = pl.read_csv(
+    "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv",
+    null_values="NA",
+)
+
+# filtering to only rows with available body mass data
+penguins_complete = penguins.filter(pl.col("body_mass_g").is_not_null())
+
+# coercing null to nan
+penguins_complete = penguins_complete.with_columns(pl.all().fill_null(np.nan))
+
+# separate into X and y
+y = penguins_complete["body_mass_g"]
+X = penguins_complete.select(pl.exclude("body_mass_g"))
+
+# coerce X to pandas since polars dfs don't seem to be supported for all of the sklearn steps yet
+X = X.to_pandas()
+
+# train test split
+X_trn, X_tst, y_trn, y_tst = train_test_split(X, y, random_state=408)
+
+# create pipeline for categorical features
+cat_feats = ["species", "island", "sex"]
+cat_transform = Pipeline(
+    [
+        ("cat_imputer", SimpleImputer(strategy="most_frequent")),
+        ("oh_encoder", OneHotEncoder(drop="first")),
+    ]
+)
+
+# create pipeline for numerical features
+cont_feats = ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "year"]
+cont_transform = Pipeline(
+    [
+        ("cont_imputer", SimpleImputer(strategy="mean")),
+        ("standardizer", StandardScaler()),
+    ]
+)
+
+# create a preprocessing pipeline
+preprocessor = ColumnTransformer(
+    [("cats", cat_transform, cat_feats), ("conts", cont_transform, cont_feats)]
+)
+
+# make full pipeline
+pipe = Pipeline([("preprocess", preprocessor), ("lin_reg", LinearRegression())])
+
+# fit pipeline
+pipe.fit(X_trn, y_trn)
+
+# predict training y's
+y_hat = pipe.predict(X_trn)
+
+# evaluate model
+y_hat_tst = pipe.predict(X_tst)
+
+math.sqrt(mean_squared_error(y_tst, y_hat_tst))
+
+
+```
