@@ -42,6 +42,13 @@
     "text": "Create Simple Program\nfunc main() {\n\n    us := NewUserStore()\n    is := NewItemStore()\n\n    s := NewStorer(us, is)\n\n    var items []*Item\n    var users []*User\n\n    u := &User{\n        Name: \"Eric\",\n        Age:  34,\n    }\n\n    i := &Item{\n        Name:  \"Phone\",\n        Usage: \"texting\",\n    }\n\n    items = s.AddItem(items, i)\n    users = s.AddUser(users, u)\n\n    //embed to json\n    ji, _ := json.Marshal(items)\n    ju, _ := json.Marshal(users)\n\n    //print out results\n    fmt.Println(string(ji))\n    fmt.Println(string(ju))\n}"
   },
   {
+    "objectID": "Go/parse_query_params.html",
+    "href": "Go/parse_query_params.html",
+    "title": "Parsing URL Query Parameters",
+    "section": "",
+    "text": "This is a small example of how to parse url query parameters in Go. I was learning this in service of another project, in which case I wanted the parameters in the map[string]string format, but this doesn’t always need to be the case.\npackage main\n\nimport (\n    \"encoding/json\"\n    \"fmt\"\n    \"log\"\n    \"net/http\"\n    \"strings\"\n)\n\nfunc DemoGet(w http.ResponseWriter, r *http.Request) {\n\n    urlParams := r.URL.Query()\n\n    //in a use case for another project, i want the urlParams to be encoded as a map[string]string\n    //but this won't always be the use case\n    m := make(map[string]string, len(urlParams))\n\n    for i, v := range urlParams {\n        //in prod, we probably don't want to error out\n        //but yolo for now\n        if len(v) &gt; 1 {\n            log.Fatal(\"query parameters should all be length 1\")\n        }\n        s := strings.Join(v, \"\")\n        m[i] = s\n    }\n\n    w.Header().Set(\"Content-Type\", \"application/json\")\n\n    json.NewEncoder(w).Encode(m)\n}\n\nfunc main() {\n    r := http.NewServeMux()\n\n    r.HandleFunc(\"/demoget\", DemoGet)\n\n    s := &http.Server{\n        Addr:    \":8080\",\n        Handler: r,\n    }\n\n    fmt.Println(\"Running demo program\")\n\n    s.ListenAndServe()\n}"
+  },
+  {
     "objectID": "Go/post_request_validation.html",
     "href": "Go/post_request_validation.html",
     "title": "Validating Post Requests",
