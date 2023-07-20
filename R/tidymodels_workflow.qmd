@@ -1,0 +1,65 @@
+---
+title: "Tidymodels Workflow"
+description: |
+  A minimal machine learning pipeline using R's tidymodels framework
+date: 2023-07-20
+format:
+  html:
+    code-fold: false
+execute:
+  warning: false
+---
+
+Below is a minimal (yet complete) example of a machine learning pipeline that use's R's [tidymodels](https://www.tidymodels.org/) framework and the [Palmer Penguins dataset](https://allisonhorst.github.io/palmerpenguins/).
+
+Note that the goal here isn't necessarily to fit the best model or demonstrate all of the features; rather it's just to demonstrate a tidymodels workflow.
+
+```{r}
+library(tidymodels)
+library(tidyverse)
+
+set.seed(0408)
+
+# there's a package for this, but let's just grab the csv
+penguins <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv")
+
+# drop rows missing body mass
+penguins_complete <- penguins |>
+    filter(!is.na(body_mass_g))
+
+# split the data into training and validation
+penguins_split <- initial_split(penguins, prop = .8)
+
+trn <- training(penguins_split)
+val <- testing(penguins_split)
+
+# define a recipe for preprocessing
+penguins_rec <- recipe(body_mass_g ~ ., data = trn) |>
+    step_impute_mode(all_nominal_predictors()) |>
+    step_impute_mean(all_numeric_predictors()) |>
+    step_normalize(all_numeric_predictors()) |>
+    step_dummy(all_nominal_predictors())
+
+# define a model specification
+lm_spec <- linear_reg() |>
+    set_engine("lm")
+
+# define a workflow with our preprocessor and our model
+wf <- workflow(penguins_rec, lm_spec)
+
+# fit the workflow
+wf_fit <- wf |>
+    fit(data = trn)
+
+# predict testing data
+y_hat <- unlist(predict(wf_fit, new_data = val))
+
+# estimate performance
+eval_tbl <- tibble(
+    truth = val$body_mass_g,
+    estimate = y_hat
+)
+
+rmse(eval_tbl, truth, estimate)
+
+```

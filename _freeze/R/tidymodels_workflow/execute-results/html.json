@@ -1,0 +1,16 @@
+{
+  "hash": "924a6e847f51796e283c4a7b07c643e7",
+  "result": {
+    "markdown": "---\ntitle: \"Tidymodels Workflow\"\ndescription: |\n  A minimal machine learning pipeline using R's tidymodels framework\ndate: 2023-07-20\nformat:\n  html:\n    code-fold: false\nexecute:\n  warning: false\n---\n\n\nBelow is a minimal (yet complete) example of a machine learning pipeline that use's R's [tidymodels](https://www.tidymodels.org/) framework and the [Palmer Penguins dataset](https://allisonhorst.github.io/palmerpenguins/).\n\nNote that the goal here isn't necessarily to fit the best model or demonstrate all of the features; rather it's just to demonstrate a tidymodels workflow.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidymodels)\nlibrary(tidyverse)\n\nset.seed(0408)\n\n# there's a package for this, but let's just grab the csv\npenguins <- read_csv(\"https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv\")\n\n# drop rows missing body mass\npenguins_complete <- penguins |>\n    filter(!is.na(body_mass_g))\n\n# split the data into training and validation\npenguins_split <- initial_split(penguins, prop = .8)\n\ntrn <- training(penguins_split)\nval <- testing(penguins_split)\n\n# define a recipe for preprocessing\npenguins_rec <- recipe(body_mass_g ~ ., data = trn) |>\n    step_impute_mode(all_nominal_predictors()) |>\n    step_impute_mean(all_numeric_predictors()) |>\n    step_normalize(all_numeric_predictors()) |>\n    step_dummy(all_nominal_predictors())\n\n# define a model specification\nlm_spec <- linear_reg() |>\n    set_engine(\"lm\")\n\n# define a workflow with our preprocessor and our model\nwf <- workflow(penguins_rec, lm_spec)\n\n# fit the workflow\nwf_fit <- wf |>\n    fit(data = trn)\n\n# predict testing data\ny_hat <- unlist(predict(wf_fit, new_data = val))\n\n# estimate performance\neval_tbl <- tibble(\n    truth = val$body_mass_g,\n    estimate = y_hat\n)\n\nrmse(eval_tbl, truth, estimate)\n```\n\n::: {.cell-output .cell-output-stdout}\n```\n# A tibble: 1 × 3\n  .metric .estimator .estimate\n  <chr>   <chr>          <dbl>\n1 rmse    standard        315.\n```\n:::\n:::\n",
+    "supporting": [
+      "tidymodels_workflow_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
