@@ -98,6 +98,13 @@
     "text": "How to pre-allocate vectors used in your for loops in R to make your code run faster and perform fewer allocations.\nFirst, set n to be the size of the vector we want to work with\n\nn &lt;- 1e6\n\nThen set up a function that doesn’t pre-allocate a list\n\nno_alloc &lt;- function(n) {\n\n    x &lt;- list()\n\n    for (i in seq_len(n)) {\n        x[[i]] &lt;- i\n    }\n\n    x\n}\n\nThen set up a function that does pre-allocate a list\n\npre_alloc &lt;- function(n) {\n    \n    x &lt;- vector(mode = \"list\", length = n)\n\n    for (i in seq_len(n)) {\n        x[[i]] &lt;- i\n    }\n    \n    x\n}\n\nAnd compare the benchmarks for these functions\n\nlibrary(bench)\n\nres &lt;- bench::mark(\n    no_alloc(n),\n    pre_alloc(n)\n)\n\nWarning: Some expressions had a GC in every iteration; so filtering is disabled.\n\nres[c(\"expression\", \"min\", \"median\", \"itr/sec\", \"n_gc\")]\n\n# A tibble: 2 × 4\n  expression        min   median `itr/sec`\n  &lt;bch:expr&gt;   &lt;bch:tm&gt; &lt;bch:tm&gt;     &lt;dbl&gt;\n1 no_alloc(n)   660.4ms  660.4ms      1.51\n2 pre_alloc(n)   60.6ms   64.6ms     12.6 \n\n\nWe can see that pre-allocating is the way to go!"
   },
   {
+    "objectID": "R/s3.html",
+    "href": "R/s3.html",
+    "title": "S3 Methods",
+    "section": "",
+    "text": "Below is a sort of minimal example of S3 methods, including how to define them for various classes.\n\nDefine a Generic\n\ncombine &lt;- function(x) {\n    UseMethod(\"combine\")\n} \n\n\n\nDefine and Instantiate Some Classes\n\n# constructor for a new instance of 'my_class'\nnew_my_class &lt;- function(x, y) {\n    stopifnot(is.character(x) & is.character(y))\n\n    structure(\n        list(x = x, y = y),\n        class = \"my_class\"\n    )\n} \n\n# constructor for a new instance of 'your_class'\nnew_your_class &lt;- function(x, y) {\n    stopifnot(is.numeric(x) & is.numeric(y))\n\n    structure(\n        list(x = x, y = y),\n        class = \"your_class\"\n    )\n}\n\na &lt;- new_my_class(\"aaa\", \"bbb\")\nb &lt;- new_your_class(1, 2)\n\n\n\nDefine Combine Methods for Each Class\n\ncombine.my_class &lt;- function(x) {\n    paste0(\n        vctrs::field(x, \"x\"),\n        vctrs::field(x, \"y\")\n    )\n} \n\ncombine.your_class &lt;- function(x) {\n    a &lt;- vctrs::field(x, \"x\")\n    b &lt;- vctrs::field(x, \"y\")\n\n    a + b\n}\n\n\n\nCall Methods\n\ncombine(a) \n\n[1] \"aaabbb\"\n\n\n\ncombine(b) \n\n[1] 3\n\n\nhuzzah!"
+  },
+  {
     "objectID": "R/tidymodels_workflow.html",
     "href": "R/tidymodels_workflow.html",
     "title": "Tidymodels Workflow",

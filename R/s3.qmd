@@ -1,0 +1,78 @@
+---
+title: "S3 Methods"
+description: |
+  A minimal example of creating and calling S3 methods
+date: 2023-08-03
+format:
+  html:
+    code-fold: false
+execute: 
+  warning: false
+---
+
+Below is a sort of minimal example of S3 methods, including how to define them for various classes.
+
+# Define a Generic
+
+```{r}
+combine <- function(x) {
+    UseMethod("combine")
+} 
+```
+
+# Define and Instantiate Some Classes
+
+```{r}
+# constructor for a new instance of 'my_class'
+new_my_class <- function(x, y) {
+    stopifnot(is.character(x) & is.character(y))
+
+    structure(
+        list(x = x, y = y),
+        class = "my_class"
+    )
+} 
+
+# constructor for a new instance of 'your_class'
+new_your_class <- function(x, y) {
+    stopifnot(is.numeric(x) & is.numeric(y))
+
+    structure(
+        list(x = x, y = y),
+        class = "your_class"
+    )
+}
+
+a <- new_my_class("aaa", "bbb")
+b <- new_your_class(1, 2)
+```
+
+# Define Combine Methods for Each Class
+
+```{r}
+combine.my_class <- function(x) {
+    paste0(
+        vctrs::field(x, "x"),
+        vctrs::field(x, "y")
+    )
+} 
+
+combine.your_class <- function(x) {
+    a <- vctrs::field(x, "x")
+    b <- vctrs::field(x, "y")
+
+    a + b
+}
+```
+
+# Call Methods
+
+```{r}
+combine(a) 
+```
+
+```{r}
+combine(b) 
+```
+
+huzzah!
