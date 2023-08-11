@@ -7,3 +7,5 @@
 <!-- badges: end -->
 
 A sort of miscellaneous website that contains notes on statistics, programming, ML, and other related topics. It's mostly meant to serve as a place for me to park code snippets and notes I'll want to reference later. Inspired by Vicki Boykis's [BoringML](https://boringml.com/)
+
+As of now, the notes are fairly code-centric and there's minimal narrative surrounding them, but this may not always be the case.

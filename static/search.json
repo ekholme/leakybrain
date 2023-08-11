@@ -77,6 +77,34 @@
     "text": "Below is a minimal (yet complete) example of a machine learning pipeline that use’s Julia’s MLJ framework and the Palmer Penguins dataset.\nNote that the goal here isn’t necessarily to fit the best model; rather it’s just to demonstrate an MLJ pipeline.\n\nusing DataFrames\nusing CSV\nusing Random\nusing MLJ\n\nRandom.seed!(0408)\n\n#get penguins data\npenguins = CSV.read(download(\"https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv\"), DataFrame, missingstring=\"NA\")\n\n#filter to those without missing body mass\ndropmissing!(penguins, :body_mass_g)\n\n#extract body mass as y\ny, X = unpack(penguins, ==(:body_mass_g))\n\n# coercing textual columns to multiclass for modeling\ncoerce_nms = [:species, :sex, :island]\n\nc_dict = Dict(zip(coerce_nms, repeat([Multiclass], 3)))\n\ncoerce!(\n    X,\n    c_dict\n)\n\n#get training and validation indices\ntrn, val = partition(eachindex(y), 0.8; shuffle=true)\n\n#define pipeline components\nimp = FillImputer();\nstand = Standardizer();\noh = OneHotEncoder(drop_last=true);\nLinearRegression = @load LinearRegressor pkg = GLM add = true\nmod = LinearRegression()\n\n#define pipeline\nm = Pipeline(imp, stand, oh, mod)\n\n#define machine\nmach = machine(m, X, y);\n\n#fit machine on training rows\nfit!(mach, rows=trn)\n\n#predicting training y's\nŷ = MLJ.predict_mean(mach, X[trn, :])\n\n#evaluate model\ncv = CV(nfolds=3)\n\nMLJ.evaluate!(mach, rows=val, resampling=cv, measure=rmse)\n\n#note -- call measures() to see all available measures\n\n┌ Info: Trying to coerce from `Union{Missing, String7}` to `Multiclass`.\n└ Coerced to `Union{Missing,Multiclass}` instead.\n[ Info: For silent loading, specify `verbosity=0`. \n[ Info: Training machine(ProbabilisticPipeline(fill_imputer = FillImputer(features = Symbol[], …), …), …).\n[ Info: Training machine(:fill_imputer, …).\n[ Info: Training machine(:standardizer, …).\n[ Info: Training machine(:one_hot_encoder, …).\n[ Info: Spawning 2 sub-features to one-hot encode feature :species.\n[ Info: Spawning 2 sub-features to one-hot encode feature :island.\n[ Info: Spawning 1 sub-features to one-hot encode feature :sex.\n[ Info: Training machine(:linear_regressor, …).\n[ Info: Creating subsamples from a subset of all rows. \nEvaluating over 3 folds:  67%[================&gt;        ]  ETA: 0:00:01Evaluating over 3 folds: 100%[=========================] Time: 0:00:02\n\n\nimport MLJGLMInterface ✔\n\n\n\nPerformanceEvaluation object with these fields:\n  measure, operation, measurement, per_fold,\n  per_observation, fitted_params_per_fold,\n  report_per_fold, train_test_rows\nExtract:\n┌────────────────────────┬──────────────┬─────────────┬─────────┬───────────────\n│ measure                │ operation    │ measurement │ 1.96*SE │ per_fold     ⋯\n├────────────────────────┼──────────────┼─────────────┼─────────┼───────────────\n│ RootMeanSquaredError() │ predict_mean │ 342.0       │ 94.8    │ [277.0, 322. ⋯\n└────────────────────────┴──────────────┴─────────────┴─────────┴───────────────\n                                                                1 column omitted"
   },
   {
+    "objectID": "Python/basics_classes.html",
+    "href": "Python/basics_classes.html",
+    "title": "Basics - Classes",
+    "section": "",
+    "text": "The stuff below is like Python classes 101. It’s mostly either directly copied from or else loosely inspired by the Python manual\n# define a new class\nclass MyClass:\n    x = 123\n\n    def greet(self):\n        return \"Hello from MyClass\"\n\n\nx = MyClass()\n\n# see class attributes\nx.greet()\nx.x\n\n123"
+  },
+  {
+    "objectID": "Python/basics_classes.html#init-method",
+    "href": "Python/basics_classes.html#init-method",
+    "title": "Basics - Classes",
+    "section": "Init Method",
+    "text": "Init Method\n\n# we can define an __init()__ method to help us create object instances with specific initial states\nclass MyClass:\n    def __init__(self, x):\n        self.x = x\n\n    def greet(self):\n        return \"Hello from MyClass\"\n\n\ny = MyClass(x=1)\ny.x\n\n1"
+  },
+  {
+    "objectID": "Python/basics_classes.html#class-variables-and-instance-variables",
+    "href": "Python/basics_classes.html#class-variables-and-instance-variables",
+    "title": "Basics - Classes",
+    "section": "Class Variables and Instance Variables",
+    "text": "Class Variables and Instance Variables\n\n# class variables will be shared by all instances, whereas instance variables will be unique to each instance\nclass Dog:\n    kind = \"canine\"  # class variable\n\n    def __init__(self, name):\n        self.name = name\n\n\nd = Dog(\"Nala\")\ne = Dog(\"Adi\")\n\nd.name\nd.kind\ne.name\n\n\n# below might be a way to create a Dog class where each dog has its own set of tricks\nclass Dog:\n    kind = \"canine\"\n\n    def __init__(self, name):\n        self.name = name\n        self.tricks = []\n\n    def add_trick(self, trick):\n        self.tricks.append(trick)\n\n\nd = Dog(\"Nala\")\nd.add_trick(\"roll over\")\nd.add_trick(\"sit\")\n\nd.tricks\n\n['roll over', 'sit']"
+  },
+  {
+    "objectID": "Python/basics_classes.html#class-inheritance",
+    "href": "Python/basics_classes.html#class-inheritance",
+    "title": "Basics - Classes",
+    "section": "Class Inheritance",
+    "text": "Class Inheritance\nClass inheritance lets classes inherit variables and methods from other classes\n\n# classes also support inheritance\nclass Animal:\n    def __init__(self, name):\n        self.name = name\n\n\nclass Cat(Animal):\n    kind = \"cat\"\n\n\na = Cat(\"Fluffy\")\n\na.name\na.kind\n\n'cat'"
+  },
+  {
     "objectID": "Python/sklearn_pipeline.html",
     "href": "Python/sklearn_pipeline.html",
     "title": "Scikit-Learn Pipeline",
