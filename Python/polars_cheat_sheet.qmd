@@ -1,0 +1,187 @@
+---
+title: "Polars Cheat Sheet"
+description: |
+  A work-in-progress cheat sheet for working with polars dataframes
+format:
+  html:
+    code-fold: false
+jupyter: python3
+---
+
+# Setup & Read in Data
+
+```{python}
+import polars.selectors as cs
+import polars as pl
+
+# read in data
+penguins = pl.read_csv(
+    "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv",
+    null_values="NA",
+)
+```
+
+
+# Check Properties of a Dataframe
+
+use the `shape` attribute to check the dimensions (rows, cols)
+
+```{python}
+penguins.shape
+```
+
+use the `head()` method to see the first few rows
+
+```{python}
+penguins.head()
+```
+
+to see the column names, we can use the `columns` attribute
+
+```{python}
+penguins.columns
+```
+
+# Subset Rows
+
+For the most part, we want to subset rows using the `filter()` method.
+
+For example, we might want to filter out rows that aren't missing data for the body mass variable
+
+```{python}
+penguins.filter(pl.col("body_mass_g").is_not_null())
+```
+
+
+Basically, filter keeps rows where the expression evaluates to `True`. And so we can use any predicate expression that results in a boolean. We can also use multiple expressions.
+
+```{python}
+penguins.filter((pl.col("species") == "Adelie") & (pl.col("bill_length_mm") >= 39.0))
+```
+
+We might also want to filter based on string matches. For example, strings that start with a certain substring
+
+```{python}
+penguins.filter(pl.col("species").str.starts_with("Chin"))
+```
+
+# Subset Columns
+
+To subset columns, we want to use the `select()` method.
+
+```{python}
+penguins.select("species")
+```
+
+To select multiple columns, we pass in a list
+
+```{python}
+penguins.select(["species", "island"])
+```
+
+To select columns with regex, we can pass regex to `pl.col()`. Note that we need to indicate this is regex by passing both ^ and $.
+
+```{python}
+penguins.select(pl.col("^bill_.*$"))
+```
+
+and we can also exclude by regex
+
+```{python}
+penguins.select(pl.exclude("^bill_.*$"))
+```
+
+Polars (via the polars.selectors module) also provides utilities similar to tidyverse selectors, such as `starts_with()`
+
+```{python}
+penguins.select(cs.starts_with("bill"))
+```
+
+Another useful feature is selecting by data type. This is something that polars.selectors enables. For instance, if we wanted to select all numeric columns
+
+```{python}
+penguins.select(cs.by_dtype(pl.NUMERIC_DTYPES))
+```
+
+# Creating New Columns
+
+To create new columns, we'll use the `with_columns()` method, which is similar to `dplyr::mutate()`
+
+```{python}
+penguins.with_columns(is_chinstrap=pl.col("species") == "Chinstrap")
+```
+
+We can create multiple columns at a time
+
+```{python}
+penguins.with_columns(
+    is_chinstrap=pl.col("species") == "Chinstrap",
+    chonk=pl.col("body_mass_g") >= 4000,
+    bill_stuff=pl.col("bill_length_mm") + pl.col("bill_depth_mm"),
+    sex_initial=pl.col("sex").str.slice(0, 1).str.to_uppercase(),
+)
+```
+
+I'll likely add more examples here as I encounter common use cases.
+
+# Summarizing DataFrames
+
+Most summarizing workflows will involve the `groupby()` method, followed by some other operation.
+
+Probably the most common thing we'll want to do is count by group
+
+```{python}
+penguins.groupby("island").count()
+```
+
+We can also group by multiple columns
+
+```{python}
+penguins.groupby(["island", "species"]).count()
+```
+
+Another common thing might be to take the average of a numeric column by group. We can do this via the `agg()` method and passing various aggregation/summarization functions to this method.
+
+```{python}
+penguins.groupby("species").agg(pl.mean("bill_length_mm").alias("bill_length_mean"))
+```
+
+We might also want to get the average of all of our numeric types by group. This is another situation where the `polars.selectors` module is helpful.
+
+```{python}
+penguins.groupby("species").agg(cs.by_dtype(pl.NUMERIC_DTYPES).mean().suffix("_mean"))
+```
+
+Or we might want to apply multiple aggregation functions to a column. This works basically like `with_columns()` in that you can pass multiple expressions
+
+```{python}
+penguins.groupby("species").agg(
+    pl.mean("bill_length_mm").alias("bill_length_mean"),
+    pl.col("bill_length_mm").count().alias("n"),
+)
+```
+
+# Reshaping Long and Wide
+
+Let's take our summary from before where we calculated the average of all of the numeric columns by species
+
+```{python}
+species_means = penguins.groupby("species").agg(cs.by_dtype(pl.NUMERIC_DTYPES).mean())
+```
+
+Now suppose we want to pivot this longer so that it's in "tidy" format. To do this, we want the `melt()` method.
+
+```{python}
+species_long = species_means.melt(id_vars="species")
+
+species_long.head()
+```
+
+Note that in the above, there's also a `value_vars` parameter. By leaving it empty, it defaults to every column not in `id_vars`, but this might not always be the right choice.
+
+And if we want to reshape back to wide, we use `pivot()`. Pivot can optionally perform aggregations while reshaping, so we need to tell it that we don't want it to aggregate anything (by passing `aggregate_function=None`)
+
+```{python}
+ species_long.pivot(values="value", index="species", columns="variable", aggregate_function=None)
+```
+
