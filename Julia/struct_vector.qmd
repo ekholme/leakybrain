@@ -1,0 +1,75 @@
+---
+title: "Inititializing a Vector of Structs"
+description: |
+  How to initialize a vector of structs in Julia
+date: today
+format:
+  html:
+    code-fold: false
+jupyter: julia-1.9
+---
+
+Here's an example of how to initialize a vector of structs in Julia. It's sometimes useful to coerce other data structures into vectors of structs to perform operations on them, and so this snippet provides a basic example of creating and populating a vector of a custom struct
+
+# Load Pkgs and Define Struct
+
+```{julia}
+using Random #for creating data
+
+#define struct
+mutable struct MyType
+  x::String
+  y::Int64
+  z::Vector{Float64}
+end
+
+#instantiate an example struct
+a = MyType("hello", 1, [1., 1.5, 104.1])
+```
+
+# Create a Constructor
+
+This isn't strictly necessary, but it can be useful. This just creates a new instance of MyType with random values
+
+```{julia}
+function MyType()
+    MyType(randstring(10), rand(1:100), rand(Float64, 3))
+end
+
+a = MyType()
+```
+
+
+# Create an Empty n-vector, then Populate It
+
+```{julia}
+n = 100
+
+#initialize an n-vector with 0 values
+v = Vector{MyType}(undef, n)
+
+#populate the vector
+for i ∈ eachindex(v)
+    v[i] = MyType()
+end
+```
+
+# Check Results
+
+we want v to be a vector of MyType
+
+```{julia}
+typeof(v)
+```
+
+and we want each element to be MyType
+
+```{julia}
+typeof(v[1])
+```
+
+and let's check the first element
+
+```{julia}
+v[1]
+```
