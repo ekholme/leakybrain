@@ -56,6 +56,34 @@
     "text": "This is a pretty small example of how to validate a post request in Go. It’s not at all difficult, but I’m writing this because I often forget to do this, and I’m hoping that writing it will make me remember.\npackage main\n\nimport (\n    \"encoding/json\"\n    \"fmt\"\n    \"log\"\n    \"net/http\"\n\n    \"github.com/go-playground/validator\"\n)\n\nconst (\n    listenAddr string = \":8080\"\n)\n\n//when defining the struct, be sure to indicate validation requirements\n//you can also do something like validate:\"required,email\" to check that the input is an email\ntype User struct {\n    FirstName string `json:\"firstName\" validate:\"required\"`\n    LastName  string `json:\"lastName\" validate:\"required\"`\n}\n\nfunc handleIndex(w http.ResponseWriter, r *http.Request) {\n\n    switch r.Method {\n    case http.MethodGet:\n        msg := \"hello, world\"\n\n        w.WriteHeader(http.StatusOK)\n\n        w.Write([]byte(msg))\n\n    case http.MethodPost:\n        var u *User\n\n        //create a new instance of a validator\n        validate := validator.New()\n\n        json.NewDecoder(r.Body).Decode(&u)\n\n        //validate the struct\n        err := validate.Struct(u)\n\n        if err != nil {\n            http.Error(w, \"invalid request\", http.StatusBadRequest)\n            return\n        }\n\n        msg := \"hello, \" + u.FirstName + \" \" + u.LastName\n\n        w.WriteHeader(http.StatusOK)\n\n        w.Write([]byte(msg))\n    default:\n        http.Error(w, \"method not allowed\", http.StatusMethodNotAllowed)\n    }\n}\n\nfunc main() {\n    r := http.NewServeMux()\n\n    r.HandleFunc(\"/\", handleIndex)\n\n    fmt.Println(\"Running server\")\n\n    err := http.ListenAndServe(listenAddr, r)\n\n    log.Fatal(err)\n}"
   },
   {
+    "objectID": "Go/test_http_server.html",
+    "href": "Go/test_http_server.html",
+    "title": "Testing an HTTP Server",
+    "section": "",
+    "text": "This is a small example of how to test an HTTP server endpoint. I’ve gotten in the bad habit of not writing tests for my Go code, and I need to brush up on how to write tests.\nI’ll likely do a better version of this later that uses mocks, but for now, this will suffice.\nThe code below is split into 3 different files:"
+  },
+  {
+    "objectID": "Go/test_http_server.html#main.go",
+    "href": "Go/test_http_server.html#main.go",
+    "title": "Testing an HTTP Server",
+    "section": "main.go",
+    "text": "main.go\nThe contents of main.go are:\npackage main\n\nfunc main() {\n    s := NewServer()\n    s.Run()\n}\nThis file really just bundles everything together and runs the application"
+  },
+  {
+    "objectID": "Go/test_http_server.html#server.go",
+    "href": "Go/test_http_server.html#server.go",
+    "title": "Testing an HTTP Server",
+    "section": "server.go",
+    "text": "server.go\nThe contents of server.go are:\npackage main\n\nimport (\n    \"fmt\"\n    \"net/http\"\n)\n\n//define a user type\ntype User struct {\n    FirstName string\n    Age       int\n}\n\n//define a server type\ntype Server struct {\n    Srvr      *http.Server\n    UserStore []*User\n}\n\n//create a new server with some dummy data included\nfunc NewServer() *Server {\n    return &Server{\n        Srvr: &http.Server{\n            Addr: \":8080\",\n        },\n\n        UserStore: []*User{\n            {\n                FirstName: \"John\",\n                Age:       29,\n            },\n            {\n                FirstName: \"Kendall\",\n                Age:       32,\n            },\n        },\n    }\n}\n\n//define a function to handle an endpoint requesting the user's age\nfunc (s *Server) HandleGetUserAge(w http.ResponseWriter, r *http.Request) {\n    q := r.URL.Query()\n    firstName := q.Get(\"first_name\")\n\n    for _, user := range s.UserStore {\n        if user.FirstName == firstName {\n            w.WriteHeader(http.StatusOK)\n            fmt.Fprint(w, user.Age)\n            return\n        }\n    }\n\n    w.WriteHeader(http.StatusNotFound)\n    fmt.Fprint(w, \"user not found\")\n}\n\n//run the server\nfunc (s *Server) Run() {\n    http.HandleFunc(\"/user\", s.HandleGetUserAge)\n    s.Srvr.ListenAndServe()\n}\nThis is all fairly self explanatory."
+  },
+  {
+    "objectID": "Go/test_http_server.html#server_test.go",
+    "href": "Go/test_http_server.html#server_test.go",
+    "title": "Testing an HTTP Server",
+    "section": "server_test.go",
+    "text": "server_test.go\nThe contents of server_test.go, which is the thing I’m actually interested in here, are:\npackage main\n\n//write a test for the handleGetUserAge endpoint\n\nimport (\n    \"net/http\"\n    \"net/http/httptest\"\n    \"testing\"\n)\n\nfunc TestHandleGetUserAge(t *testing.T) {\n    req, err := http.NewRequest(\"GET\", \"/user?first_name=John\", nil) //create a request\n    if err != nil {\n        t.Fatal(err)\n    }\n\n    //note that creating a mock with a datastore is probably a better way to do this, but I defined the handler above as a method on the server, so I need another server here\n    s := NewServer() //create a new server\n\n    rr := httptest.NewRecorder()                    //create a response recorder, which is a tool that lets us test http responses\n    handler := http.HandlerFunc(s.HandleGetUserAge) //create a handler function\n\n    handler.ServeHTTP(rr, req) //call the handler function\n    //note that since rr is a pointer, its data can be updated when this handler is called\n\n    if status := rr.Code; status != http.StatusOK { //check the status code\n        t.Errorf(\"handler returned wrong status code: got %v want %v\",\n            status, http.StatusOK)\n    }\n\n    expected := \"29\"        //expected response. We know this is what shoul be returned since this is John's age in the dummy data we created\n    got := rr.Body.String() //get the response body\n    if got != expected {    //check the response body\n        t.Errorf(\"handler returned unexpected body: got %v want %v\",\n            got, expected)\n    }\n}\nIf we run the test, we’ll see that it passes."
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "leakybrain",

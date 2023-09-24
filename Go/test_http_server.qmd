@@ -1,0 +1,154 @@
+---
+title: "Testing an HTTP Server"
+description: |
+  A small example of testing an HTTP server endpoint
+date: today
+format:
+  html:
+    code-fold: false
+---
+
+This is a small example of how to test an HTTP server endpoint. I've gotten in the bad habit of not writing tests for my Go code, and I need to brush up on how to write tests.
+
+I'll likely do a better version of this later that uses mocks, but for now, this will suffice.
+
+The code below is split into 3 different files:
+
+- `main.go` to run the application
+
+- `server.go` that defines all of the server logic
+
+- `server_test.go` that defines a test for the server's sole endpoint
+
+## main.go
+
+The contents of `main.go` are:
+
+```go
+package main
+
+func main() {
+	s := NewServer()
+	s.Run()
+}
+```
+
+This file really just bundles everything together and runs the application
+
+## server.go
+
+The contents of `server.go` are:
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+//define a user type
+type User struct {
+	FirstName string
+	Age       int
+}
+
+//define a server type
+type Server struct {
+	Srvr      *http.Server
+	UserStore []*User
+}
+
+//create a new server with some dummy data included
+func NewServer() *Server {
+	return &Server{
+		Srvr: &http.Server{
+			Addr: ":8080",
+		},
+
+		UserStore: []*User{
+			{
+				FirstName: "John",
+				Age:       29,
+			},
+			{
+				FirstName: "Kendall",
+				Age:       32,
+			},
+		},
+	}
+}
+
+//define a function to handle an endpoint requesting the user's age
+func (s *Server) HandleGetUserAge(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	firstName := q.Get("first_name")
+
+	for _, user := range s.UserStore {
+		if user.FirstName == firstName {
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, user.Age)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusNotFound)
+	fmt.Fprint(w, "user not found")
+}
+
+//run the server
+func (s *Server) Run() {
+	http.HandleFunc("/user", s.HandleGetUserAge)
+	s.Srvr.ListenAndServe()
+}
+
+```
+
+This is all fairly self explanatory.
+
+## server_test.go
+
+The contents of `server_test.go`, which is the thing I'm actually interested in here, are:
+
+```go
+package main
+
+//write a test for the handleGetUserAge endpoint
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestHandleGetUserAge(t *testing.T) {
+	req, err := http.NewRequest("GET", "/user?first_name=John", nil) //create a request
+	if err != nil {
+		t.Fatal(err)
+	}
+
+    //note that creating a mock with a datastore is probably a better way to do this, but I defined the handler above as a method on the server, so I need another server here
+	s := NewServer() //create a new server
+
+	rr := httptest.NewRecorder()                    //create a response recorder, which is a tool that lets us test http responses
+	handler := http.HandlerFunc(s.HandleGetUserAge) //create a handler function
+
+	handler.ServeHTTP(rr, req) //call the handler function
+    //note that since rr is a pointer, its data can be updated when this handler is called
+
+	if status := rr.Code; status != http.StatusOK { //check the status code
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	expected := "29"        //expected response. We know this is what shoul be returned since this is John's age in the dummy data we created
+	got := rr.Body.String() //get the response body
+	if got != expected {    //check the response body
+		t.Errorf("handler returned unexpected body: got %v want %v",
+			got, expected)
+	}
+}
+
+```
+
+If we run the test, we'll see that it passes.
