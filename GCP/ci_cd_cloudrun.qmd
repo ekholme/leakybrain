@@ -1,0 +1,43 @@
+---
+title: "CI/CD with Cloud Run and Artifact Registry"
+date: today
+description: |
+  Using cloudbuild.yaml to configure a CI/CD pipeline
+---
+
+Below is an example `cloudbuild.yaml` file that will:
+
+1. Build a Docker image using [Cloud Build](https://cloud.google.com/build?hl=en)
+
+2. Push the built image to [Artifact Registry](https://cloud.google.com/artifact-registry)
+
+3. Deploy the image to [Cloud Run](https://cloud.google.com/run?hl=en)
+
+There may be some additional setup/service account permissions that need to be specified (I'll update this later once I sort these out), but at the very least, we need to create a repository in Artifact Registry first. To do that, run the following in `gcloud`:
+
+```bash
+gcloud artifacts repositories create REPO_NAME --format docker --region us-east4
+```
+
+From there, the `cloudbuild.yaml` file should look like this:
+
+```yaml
+steps:
+  #docker build 
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t',
+            'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA',
+            '.']
+  #docker push to artifact registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA']
+
+  #deploy the container to cloud run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['run', 'deploy', 'SERVICE-NAME', '--image', 'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA', '--region', 'us-east4']
+
+#optional but prob worth setting
+timeout: 3600s
+```
+
+And then replace anything in ALL_CAPS above (without a $) with the relevant values

@@ -7,6 +7,20 @@
     "text": "Hi, friend. I’m Eric. If you’re interested in learning more about me, you can check out my personal site, where I occassionally blog and post stuff. You can also find me on Github"
   },
   {
+    "objectID": "GCP/ci_cd_cloudrun.html",
+    "href": "GCP/ci_cd_cloudrun.html",
+    "title": "CI/CD with Cloud Run and Artifact Registry",
+    "section": "",
+    "text": "Below is an example cloudbuild.yaml file that will:\n\nBuild a Docker image using Cloud Build\nPush the built image to Artifact Registry\nDeploy the image to Cloud Run\n\nThere may be some additional setup/service account permissions that need to be specified (I’ll update this later once I sort these out), but at the very least, we need to create a repository in Artifact Registry first. To do that, run the following in gcloud:\ngcloud artifacts repositories create REPO_NAME --format docker --region us-east4\nFrom there, the cloudbuild.yaml file should look like this:\nsteps:\n  #docker build \n  - name: 'gcr.io/cloud-builders/docker'\n    args: ['build', '-t',\n            'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA',\n            '.']\n  #docker push to artifact registry\n  - name: 'gcr.io/cloud-builders/docker'\n    args: ['push', 'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA']\n\n  #deploy the container to cloud run\n  - name: 'gcr.io/cloud-builders/gcloud'\n    args: ['run', 'deploy', 'SERVICE-NAME', '--image', 'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA', '--region', 'us-east4']\n\n#optional but prob worth setting\ntimeout: 3600s\nAnd then replace anything in ALL_CAPS above (without a $) with the relevant values"
+  },
+  {
+    "objectID": "GCP/gcloud_cli_commands.html",
+    "href": "GCP/gcloud_cli_commands.html",
+    "title": "gcloud CLI Commands",
+    "section": "",
+    "text": "Check Projects\nTo list all of your projects:\ngcloud projects list\nTo check which project is your default project:\ngcloud config get-value project\nTo set which project is your default project:\ngcloud config set project [PROJECT_ID]\n\n\nCloud Storage\nTo push data to a cloud storage bucket:\ngcloud storage cp PATH/TO/LOCAL/FILE.PARQUET gs://BUCKET_NAME\nNote that cp in the above command means “copy.” See other flags/options here\n\n\nApp Engine\nTo deploy an app to App Engine:\ngcloud app deploy"
+  },
+  {
     "objectID": "Go/interface_composition.html",
     "href": "Go/interface_composition.html",
     "title": "Interface Composition",

@@ -1,0 +1,47 @@
+---
+title: "gcloud CLI Commands"
+description: |
+  A running list of gcloud cli commands I frequently use
+date: today
+format:
+  html:
+    code-fold: false
+---
+
+# Check Projects
+
+To list all of your projects:
+
+```bash
+gcloud projects list
+```
+
+To check which project is your default project:
+
+```bash
+gcloud config get-value project
+```
+
+To set which project is your default project:
+
+```bash
+gcloud config set project [PROJECT_ID]
+```
+
+# Cloud Storage
+
+To push data to a cloud storage bucket:
+
+```bash
+gcloud storage cp PATH/TO/LOCAL/FILE.PARQUET gs://BUCKET_NAME
+```
+
+Note that `cp` in the above command means "copy." See other flags/options [here](https://cloud.google.com/sdk/gcloud/reference/storage/cp)
+
+# App Engine
+
+To deploy an app to App Engine:
+
+```bash
+gcloud app deploy
+```
