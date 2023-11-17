@@ -1,0 +1,16 @@
+{
+  "hash": "23311c2a1943cffb42bb603fbef56674",
+  "result": {
+    "markdown": "---\ntitle: \"Adding Colored Text to ggplot\"\ndate: today\nformat:\n  html:\n    code-fold: false\nexecute:\n  warning: false\n---\n\n\nSometimes using colored text in lieu of a legend can make plots more appealling. This is most often the case when showing data for a small number (2 or 3) different groups.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\nlibrary(ggtext)\nlibrary(palmerpenguins) \nlibrary(harrypotter)\nlibrary(glue)\n\ntheme_set(theme_minimal())\n\npal <- hp(n = 3, option = \"HermioneGranger\")\n```\n:::\n\n\nFor example, imagine we want to plot the bill length vs bill depth of different penguin species. One way to do that would be as follows:\n\n\n::: {.cell}\n\n```{.r .cell-code}\nggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +\n  geom_point() +\n  labs(\n    title = \"Bill Length vs Bill Depth by Species\"\n  ) +\n  scale_color_hp(discrete = TRUE, option = \"HermioneGranger\")\n```\n\n::: {.cell-output-display}\n![](color_text_ggplot_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n:::\n\n\nThis is fine, but we might want to get rid of the legend and explicitly denote species/color mappings in the plot title. We can do that as follows.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +\n  geom_point() +\n  labs(\n    title = glue(\"Bill Length vs Bill Depth for <span style='color:{pal[1]}'>Adelie</span>, <span style='color:{pal[2]}'>Chinstrap</span>, and <span style='color:{pal[3]}'>Gentoo</span> Penguins\")\n  ) +\n  scale_color_hp(discrete = TRUE, option = \"HermioneGranger\") +\n  theme(\n    legend.position = \"none\",\n    plot.title = element_markdown()\n  )\n```\n\n::: {.cell-output-display}\n![](color_text_ggplot_files/figure-html/unnamed-chunk-3-1.png){width=672}\n:::\n:::\n\n\nThe key to the above is the `<span>` tags in the title as well as the `plot.title = element_markdown()` argument in the theme. All in all, this requires a little bit more setup, but I think the plot looks  cleaner/more refined.",
+    "supporting": [
+      "color_text_ggplot_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
