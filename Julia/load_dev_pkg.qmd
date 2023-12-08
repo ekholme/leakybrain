@@ -1,0 +1,15 @@
+---
+title: "Install a Local Dev Pkg"
+description: |
+  How to install a local in-development package in Julia
+date: 2023-12-07
+---
+
+Sometimes it's helpful to be able to load/install a local Julia package. We can do this as follows:
+
+``` bash
+]
+dev path/to/pkg
+```
+
+where the path to the pkg is probably going to be something like `.julia/dev/MyPkg`

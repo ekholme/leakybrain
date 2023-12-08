@@ -1,0 +1,48 @@
+---
+title: "Interact with Google's Vertex AI Text Generation Models"
+description: |
+  A minimal example demonstrating how to use Google Cloud text generation models via the python SDK
+date: 2023-12-07 
+---
+
+This provides a minimal example of how to interact with Google's Text-Bison model -- a text generation model offered through GCP's VertexAI suite of tools.
+
+``` bash
+#if aiplatform isn't installed, do that
+pip install --upgrade google-cloud-aiplatform
+```
+
+This will show how to pass a prompt and some hyperparameters to the text generation model, then view a response passed back.
+
+``` python
+import vertexai
+from vertexai.languagemodels import TextGenerationModel
+
+#you might need to initiate a project
+vertexai.init(project="my-project-id")
+
+#instantiate a model
+model = TextGenerationModel.from_pretrained("text-bison@001")
+```
+
+In the above, `"text-bison@001"` is the model we're passing our prompt to. This is an ok default, but we might want to see the [list of available models](https://cloud.google.com/vertex-ai/docs/generative-ai/learn/models) to choose a different one. This is especiall true if we need to pass a large piece of text to a model.
+
+``` python
+#p is our prompt
+p = "Generate 10 interview questions that would be suitable to ask a candidate for an educational researcher position"
+
+#obviously we can tweak these as needed
+#but these feel like decent defaults
+params = {
+    "temperature": 0.2,
+    "top_p": 0.9,
+    "top_k": 40,
+    "max_output_tokens": 1024
+}
+
+#hit the model and get a response
+resp = model.predict(p, **params)
+
+#view the text from the response
+print(resp.text)
+```

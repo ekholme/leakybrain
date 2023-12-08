@@ -112,6 +112,13 @@
     "text": "Creating a new Julia package is easiest if you create whatever.jl script to help establish the template, e.g.\ncd some/path\ntouch whatever.jl\nThen open this with VSCode. Once in VSCode, open the terminal and install PkgTemplates.jl if it’s not already installed:\n]\nadd PkgTemplates\nThen create a template with the options you want in your new package. The way I currently do this is:\nusing PkgTemplates\n\nt = Template(;\n    user = \"ekholme\", #or your git user.name\n    license = \"MIT\",\n    authors = [\"Eric Ekholm\"],\n    julia_version = v\"1.8\", #or w/e version you want\n    plugins = [\n        GitHubActions(),\n        Codecov(),\n        GitHubPages(),\n        TravisCI()\n    ]\n)\n\nt(\"MyPkgName\")\nAnd then running this will create a new package (and set up all of your Git stuff if it’s already configured)"
   },
   {
+    "objectID": "Julia/load_dev_pkg.html",
+    "href": "Julia/load_dev_pkg.html",
+    "title": "Install a Local Dev Pkg",
+    "section": "",
+    "text": "Sometimes it’s helpful to be able to load/install a local Julia package. We can do this as follows:\n]\ndev path/to/pkg\nwhere the path to the pkg is probably going to be something like .julia/dev/MyPkg"
+  },
+  {
     "objectID": "Julia/mlj_pipeline.html",
     "href": "Julia/mlj_pipeline.html",
     "title": "MLJ Pipeline",
@@ -173,6 +180,13 @@
     "title": "venvs in Python",
     "section": "",
     "text": "To create a venv:\npython3.11 -m venv ./venv\nand to activate it:\nsource venv/bin/activate\net voila"
+  },
+  {
+    "objectID": "Python/vertex_ai_textgen.html",
+    "href": "Python/vertex_ai_textgen.html",
+    "title": "Interact with Google’s Vertex AI Text Generation Models",
+    "section": "",
+    "text": "This provides a minimal example of how to interact with Google’s Text-Bison model – a text generation model offered through GCP’s VertexAI suite of tools.\n#if aiplatform isn't installed, do that\npip install --upgrade google-cloud-aiplatform\nThis will show how to pass a prompt and some hyperparameters to the text generation model, then view a response passed back.\nimport vertexai\nfrom vertexai.languagemodels import TextGenerationModel\n\n#you might need to initiate a project\nvertexai.init(project=\"my-project-id\")\n\n#instantiate a model\nmodel = TextGenerationModel.from_pretrained(\"text-bison@001\")\nIn the above, \"text-bison@001\" is the model we’re passing our prompt to. This is an ok default, but we might want to see the list of available models to choose a different one. This is especiall true if we need to pass a large piece of text to a model.\n#p is our prompt\np = \"Generate 10 interview questions that would be suitable to ask a candidate for an educational researcher position\"\n\n#obviously we can tweak these as needed\n#but these feel like decent defaults\nparams = {\n    \"temperature\": 0.2,\n    \"top_p\": 0.9,\n    \"top_k\": 40,\n    \"max_output_tokens\": 1024\n}\n\n#hit the model and get a response\nresp = model.predict(p, **params)\n\n#view the text from the response\nprint(resp.text)"
   },
   {
     "objectID": "R/color_text_ggplot.html",
