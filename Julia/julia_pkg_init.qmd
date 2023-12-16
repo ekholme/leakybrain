@@ -2,21 +2,22 @@
 title: "Julia Package Initialization"
 ---
 
-Creating a new Julia package is easiest if you create `whatever.jl` script to help establish the template, e.g.
+# Interactive Pkg Creation
 
-```bash
-cd some/path
-touch whatever.jl
-```
+Creating packages is probably easiest to do interactively -- it's hard to remember all of the potential arguments/configurations you want, and the "interactive mode" of PkgTemplates does a nice job of walking you through package creation.
 
-Then open this with VSCode. Once in VSCode, open the terminal and install `PkgTemplates.jl` if it's not already installed:
+The approach is pretty straightforward:
 
 ```julia
-]
-add PkgTemplates
+using PkgTemplates
+Template(interactive=true)("MyPkg")
 ```
 
-Then create a template with the options you want in your new package. The way I currently do this is:
+# Non-Interactive Pkg Creation
+
+You can also do this non-interactively by running the `Template()` function with all of the arguments you want. But again, it's hard to remember everything since you (or at least I) don't make packages all that often.
+
+But you can do it non-interactively like so:
 
 ```julia
 using PkgTemplates
