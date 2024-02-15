@@ -1,0 +1,270 @@
+---
+title: "DataFrames.jl Cheat Sheet"
+description: |
+  A WIP cheat sheet for working with DataFrames.jl
+date: 2024-02-14
+format:
+  html:
+    code-fold: false
+execute: 
+  warning: false
+jupyter: julia-1.9
+---
+
+A cheat sheet for using [DataFrames.jl](https://dataframes.juliadata.org/stable/). This is a work in progress and will (hopefully) be continuously updated/modified.
+
+# Load Pkgs and Read in data
+
+```{julia}
+using CSV
+using DataFrames
+using Statistics
+using Chain
+
+#note that the missingstring arg will read in any "NA" strings as missings
+penguins = CSV.read(download("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv"), DataFrame, missingstring="NA"
+);
+```
+
+# Check Properties of data
+
+```{julia}
+size(penguins)
+```
+
+see the first 3 rows
+
+```{julia}
+first(penguins, 3)
+```
+
+get the column names of a dataframe
+
+```{julia}
+names(penguins)
+```
+
+nb we could also convert these to `Symbol` via:
+
+```{julia}
+Symbol.(names(penguins))
+```
+
+If we want to get the column types, we can do the following:
+
+```{julia}
+eltype.(eachcol(penguins))
+```
+
+# Subsetting Rows
+
+In general, we'll want to use the `subset()` or `subset!()` functions to subset rows in a dataframe (`subset!()` is the in-place version)
+
+The syntax is a little wonky, and it tends to involve passing a symbol into an anonymous function that is then broadcast. For instance, the following will keep only the Chinstrap penguins:
+
+```{julia}
+subset(penguins, :species => s -> s .== "Chinstrap")
+```
+
+And it's straightforward to pass multiple conditions to the function:
+
+```{julia}
+subset(penguins, :species => s -> s .== "Chinstrap", :bill_length_mm => b -> b .> 50, skipmissing=true)
+```
+
+Note the use of the `skipmissing` argument. If there are missing values in a column that's being filtered on, this will throw an error
+
+We can also drop rows with any missing data via `dropmissing(df)`
+
+```{julia}
+dropmissing(penguins)
+```
+
+Or we can choose to drop rows with missing values on a specific column:
+
+```{julia}
+dropmissing(penguins, :bill_length_mm)
+```
+
+We can also subset rows using regex:
+
+```{julia}
+subset(penguins, :species => ByRow(x -> occursin(r"^Chin", x)))
+```
+
+This uses the `ByRow()` function to apply a function to each row as opposed to broadcasting, but the broadcasting notation also works
+
+```{julia}
+subset(penguins, :species => x -> occursin.(r"^Chin", x))
+```
+
+Finally, note that we can also use the bracket syntax with row indices to filter, but this feels like it's not the most useful for rows:
+
+```{julia}
+#select rows 1, 10, 15
+penguins[[1, 10, 15], :]
+```
+
+# Subsetting Columns
+
+Using bracket syntax to subset columns makes more sense:
+
+```{julia}
+penguins[:, 1:3]
+```
+
+We can also pass strings or symbols when using the bracket subsetting syntax:
+
+```{julia}
+penguins[:, [:species, :island]]
+```
+
+```{julia}
+penguins[:, ["species", "island"]]
+```
+
+An alternative way to subset columns is to use the `select()` function from `DataFrames.jl`
+
+```{julia}
+select(penguins, [:species, :island])
+```
+
+Just as with subsetting rows, we can also subset columns using regex. And the column subsetting is way easier than row subsetting:
+
+```{julia}
+select(penguins, r"bill")
+```
+
+# Creating New Columns
+
+We can create new columns using the `transform()` function (or `transform!()` for in-place).
+
+The general pattern here is that creating a column takes 3 components:
+
+1. an input column,
+2. a function to apply to that column (usually wrapped in `ByRow()`), and
+3. the name of the output column
+
+```{julia}
+transform(penguins, :species => ByRow(x -> x == "Chinstrap") => :is_chinstrap)
+```
+
+We can also create multiple columns at the same time:
+
+```{julia}
+transform(
+    penguins,
+    :species => ByRow(x -> x == "Chinstrap") => :is_chinstrap,
+    :body_mass_g => ByRow(x -> x > 4000) => :chonk
+)
+```
+
+We can pass multiple columns into an operation as well:
+
+```{julia}
+transform(
+    penguins,
+    [:bill_length_mm, :bill_depth_mm] => (+) => :bill_stuff
+)
+```
+
+This syntax isn't my favorite. Another way to do the same, though, if we wanted:
+
+```{julia}
+penguins.:bill_stuff = penguins.:bill_length_mm .+ penguins.:bill_depth_mm
+```
+
+# Summarizing DataFrames
+
+Often, summarizing will involve combining the `groupby()` method with the `combine()` method:
+
+```{julia}
+# we need to drop missings here on the body mass column first
+
+grouped_penguins = groupby(dropmissing(penguins, :body_mass_g), :species)
+
+combine(grouped_penguins, :body_mass_g => mean)
+```
+
+Counting is a common operation:
+
+```{julia}
+combine(grouped_penguins, nrow)
+```
+
+The problem here is that we've already dropped missing values on body mass, so we're not counting *all* of the observations here. I'm not sure if there's a great way around this inside of `combine()`, but something to explore more...
+
+Anyway, say we want to take the mean of all of our numeric columns. We can do that as follows. Note that I don't really like this syntax, especially compared to some of the way you'd do this in `tidyverse` or even in Python's `polars`. It also has the issue that I'm having to keep complete observations rather than column-wise complete data.
+
+```{julia}
+numeric_cols = names(penguins, Union{Missing,Number})
+
+nomiss_penguins = dropmissing(penguins)
+
+grouped_penguins = groupby(nomiss_penguins, :species)
+
+species_means = combine(grouped_penguins, numeric_cols .=> mean)
+```
+
+We can also perform multiple aggregations on a grouped dataframe, just like we did when we applied multiple transformations via `transform()`:
+
+```{julia}
+combine(
+    grouped_penguins,
+    :bill_length_mm => mean,
+    nrow => :n
+)
+```
+
+# Reshaping data
+
+Let's go back to our `species_means` data from before. Say we want to pivot this longer, so that we have a 3-column dataframe where our columns are species, metric, and value. We can do this with the `stack()` function:
+
+```{julia}
+species_means_long = stack(species_means, Not(:species), variable_name=:metric, value_name=:value)
+```
+
+To reshape back to wide, we can use the (appropriately named!) `unstack()` function. This function has the following signature:
+
+`unstack(df, id_col, variable_names, variable_values)`
+
+So in the example below, species is the id variable, metric is the column with variable names, and value is the column with values.
+
+```{julia}
+unstack(species_means_long, :species, :metric, :value)
+```
+
+# Chaining Operations
+
+You can chain dataframe operations together in Julia using the `Chain.jl` package. This is basically the same as using the pipe in tidyverse R workflows to set up data processing pipelines.
+
+For instance, we can do the following to summarize our data:
+
+```{julia}
+@chain penguins begin
+    dropmissing
+    groupby(:species)
+    combine(:body_mass_g => mean)
+end
+```
+
+The "default" specification of a chain (like above) is to assume the output of the previous function call is the first argument to the subsequent function call. So the output of `dropmissing` -- a dataframe -- is the first argument to `groupby()`, etc.
+
+Another way to specify a chain is to use an underscore `_` as a placeholder for the output of the previous expression. This isn't super useful in cases where a dataframe will be the first argument, like below:
+
+```{julia}
+@chain penguins begin
+    dropmissing(_)
+    groupby(_, :species)
+    combine(_, :body_mass_g => mean)
+end
+
+```
+
+A not-very-useful but nevertheless illustrative version of using an underscore to pipe a value into the not-first argument of a function is below:
+
+```{julia}
+@chain :body_mass_g begin
+    combine(dropmissing(penguins), _ => mean)
+end
+```

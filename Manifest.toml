@@ -2,7 +2,7 @@
 
 julia_version = "1.9.0"
 manifest_format = "2.0"
-project_hash = "32b4f4e53707ef28d58b5adb832bd8752285a35c"
+project_hash = "03f77ff7f4f1113bc3868f74e491e136060b8271"
 
 [[deps.ARFFFiles]]
 deps = ["CategoricalArrays", "Dates", "Parsers", "Tables"]
@@ -189,6 +189,11 @@ version = "0.1.10"
 
     [deps.CategoricalDistributions.weakdeps]
     UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
+
+[[deps.Chain]]
+git-tree-sha1 = "8c4920235f6c561e401dfe569beb8b924adad003"
+uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
+version = "0.5.0"
 
 [[deps.ChainRules]]
 deps = ["Adapt", "ChainRulesCore", "Compat", "Distributed", "GPUArraysCore", "IrrationalConstants", "LinearAlgebra", "Random", "RealDot", "SparseArrays", "Statistics", "StructArrays"]

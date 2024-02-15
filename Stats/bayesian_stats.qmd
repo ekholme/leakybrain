@@ -1,0 +1,11 @@
+---
+title: "Bayesian Statistics"
+description: |
+    Check out my ebook of notes
+date: 2024-02-14
+format:
+    html:
+        code-fold: false
+---
+
+For worked examples and notes on Bayesian statistics, refer to my [notes on bayesian stats site](https://ee-bayesian-stats.netlify.app/)
