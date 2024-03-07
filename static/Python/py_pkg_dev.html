@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="dcterms.date" content="2024-03-06">
-<meta name="description" content="Using cloudbuild.yaml to configure a CI/CD pipeline">
+<meta name="description" content="A general workflow for creating and developing python packages">
 
-<title>leakybrain - CI/CD with Cloud Run and Artifact Registry</title>
+<title>leakybrain - Python Package Dev</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -109,7 +109,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../GCP/ci_cd_cloudrun.html">GCP</a></li><li class="breadcrumb-item"><a href="../GCP/ci_cd_cloudrun.html">CI/CD with Cloud Run and Artifact Registry</a></li></ol></nav>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../Python/basics_classes.html">Python</a></li><li class="breadcrumb-item"><a href="../Python/py_pkg_dev.html">Python Package Dev</a></li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -145,16 +145,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="false">
  <span class="menu-text">GCP</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../GCP/ci_cd_cloudrun.html" class="sidebar-item-text sidebar-link active">
+  <a href="../GCP/ci_cd_cloudrun.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">CI/CD with Cloud Run and Artifact Registry</span></a>
   </div>
 </li>
@@ -261,13 +261,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
  <span class="menu-text">Python</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../Python/basics_classes.html" class="sidebar-item-text sidebar-link">
@@ -282,7 +282,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../Python/py_pkg_dev.html" class="sidebar-item-text sidebar-link">
+  <a href="../Python/py_pkg_dev.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Python Package Dev</span></a>
   </div>
 </li>
@@ -393,19 +393,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#step-0-install-tools" id="toc-step-0-install-tools" class="nav-link active" data-scroll-target="#step-0-install-tools">Step 0: Install Tools</a></li>
+  <li><a href="#step-1-create-pkg-structure-with-cookiecutter" id="toc-step-1-create-pkg-structure-with-cookiecutter" class="nav-link" data-scroll-target="#step-1-create-pkg-structure-with-cookiecutter">Step 1: Create pkg structure with cookiecutter</a></li>
+  <li><a href="#step-2-write-python-code-and-add-dependencies" id="toc-step-2-write-python-code-and-add-dependencies" class="nav-link" data-scroll-target="#step-2-write-python-code-and-add-dependencies">Step 2: Write python code and add dependencies</a></li>
+  <li><a href="#step-3-install-our-pkg-and-try-it-out" id="toc-step-3-install-our-pkg-and-try-it-out" class="nav-link" data-scroll-target="#step-3-install-our-pkg-and-try-it-out">Step 3: Install our pkg and try it out</a></li>
+  <li><a href="#step-4-test-code" id="toc-step-4-test-code" class="nav-link" data-scroll-target="#step-4-test-code">Step 4: Test code</a></li>
+  <li><a href="#step-5-write-and-render-documentation" id="toc-step-5-write-and-render-documentation" class="nav-link" data-scroll-target="#step-5-write-and-render-documentation">Step 5: Write and render documentation</a></li>
+  <li><a href="#step-6-tag-build-and-publish" id="toc-step-6-tag-build-and-publish" class="nav-link" data-scroll-target="#step-6-tag-build-and-publish">Step 6: Tag, build, and publish</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">CI/CD with Cloud Run and Artifact Registry</h1>
+<h1 class="title">Python Package Dev</h1>
 </div>
 
 <div>
   <div class="description">
-    <p>Using cloudbuild.yaml to configure a CI/CD pipeline</p>
+    <p>A general workflow for creating and developing python packages</p>
   </div>
 </div>
 
@@ -426,34 +438,80 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<p>Below is an example <code>cloudbuild.yaml</code> file that will:</p>
-<ol type="1">
-<li><p>Build a Docker image using <a href="https://cloud.google.com/build?hl=en">Cloud Build</a></p></li>
-<li><p>Push the built image to <a href="https://cloud.google.com/artifact-registry">Artifact Registry</a></p></li>
-<li><p>Deploy the image to <a href="https://cloud.google.com/run?hl=en">Cloud Run</a></p></li>
-</ol>
-<p>There may be some additional setup/service account permissions that need to be specified (I’ll update this later once I sort these out), but at the very least, we need to create a repository in Artifact Registry first. To do that, run the following in <code>gcloud</code>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gcloud</span> artifacts repositories create REPO_NAME <span class="at">--format</span> docker <span class="at">--region</span> us-east4</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>From there, the <code>cloudbuild.yaml</code> file should look like this:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">steps</span><span class="kw">:</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">  #docker build </span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">'gcr.io/cloud-builders/docker'</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">args</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">'build'</span><span class="kw">,</span><span class="at"> </span><span class="st">'-t'</span><span class="kw">,</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="st">'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA'</span><span class="kw">,</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="st">'.'</span><span class="kw">]</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">  #docker push to artifact registry</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">'gcr.io/cloud-builders/docker'</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">args</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">'push'</span><span class="kw">,</span><span class="at"> </span><span class="st">'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA'</span><span class="kw">]</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">  #deploy the container to cloud run</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">'gcr.io/cloud-builders/gcloud'</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">args</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">'run'</span><span class="kw">,</span><span class="at"> </span><span class="st">'deploy'</span><span class="kw">,</span><span class="at"> </span><span class="st">'SERVICE-NAME'</span><span class="kw">,</span><span class="at"> </span><span class="st">'--image'</span><span class="kw">,</span><span class="at"> </span><span class="st">'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA'</span><span class="kw">,</span><span class="at"> </span><span class="st">'--region'</span><span class="kw">,</span><span class="at"> </span><span class="st">'us-east4'</span><span class="kw">]</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#optional but prob worth setting</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 3600s</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>And then replace anything in ALL_CAPS above (without a $) with the relevant values</p>
+<p>This provides a bare-bones example of the workflow for creating and developing a python package. It is basically the workflow described in <a href="https://py-pkgs.org/03-how-to-package-a-python#">Beuzen &amp; Timbers’ Python Packages book</a> but with some tweaks/some of my notes.</p>
+<section id="step-0-install-tools" class="level1">
+<h1>Step 0: Install Tools</h1>
+<p>We need the <a href="https://python-poetry.org/">poetry</a> and <a href="https://github.com/cookiecutter/cookiecutter">cookiecutter</a> tools to help manage dependencies and set up package templates. We can install these with <a href="https://pipx.pypa.io/">pipx</a></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pipx install poetry</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pipx install cookiecutter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="step-1-create-pkg-structure-with-cookiecutter" class="level1">
+<h1>Step 1: Create pkg structure with cookiecutter</h1>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#use the python packages book cookiecutter template</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cookiecutter https://github.com/py-pkgs/py-pkgs-cookiecutter.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Also in this step we probably want to add version control and make a virtual env</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> git init</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#etc -- do a first commit, add a remote, etc.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To make a virtual env, I like to use VS Code to do this (via the command palette &gt; Python: Create Virtual Environment)</p>
+<p>then activate the venv by:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> .venv/Scripts/activate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="step-2-write-python-code-and-add-dependencies" class="level1">
+<h1>Step 2: Write python code and add dependencies</h1>
+<p>Now we can write whatever python code we want (within <code>/src</code>). Whenever we need to add a dependency, we can add it via the shell:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> poetry install <span class="op">&lt;</span>dependency_name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We’ll want to make sure we’re doing this in our virtual environment.</p>
+</section>
+<section id="step-3-install-our-pkg-and-try-it-out" class="level1">
+<h1>Step 3: Install our pkg and try it out</h1>
+<p>We can install our in-development package with</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> poetry install</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>One useful note is that we can change code in the package and we don’t need to reinstall it – it’ll just work with the new code</p>
+</section>
+<section id="step-4-test-code" class="level1">
+<h1>Step 4: Test code</h1>
+<p>First, we write tests for our code inside <code>/tests</code>. Test files should be prefixed with <code>test_</code>.</p>
+<p>We want to add <code>pytest</code> (for testing) and <code>pytest-cov</code> (for test coverage) as dependencies. But our main package doesn’t actually depend on these things – only the testing does. Since they’re a development dependency, we can specify this in poetry via:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> poetry add <span class="at">--group</span> dev pytest pytest-cov</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>and then to run our tests, we can do (in the shell):</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pytest tests/ <span class="at">--cov</span><span class="op">=&lt;</span>pkg_name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Where the <code>--cov</code> flag says we also want to see the test coverage.</p>
+</section>
+<section id="step-5-write-and-render-documentation" class="level1">
+<h1>Step 5: Write and render documentation</h1>
+<p>Some of the boilerplate documentation will be pre-generated via the cookiecutter package we used. We’ll definitely want to update the README, though, and possibly some other files.</p>
+<p>We’ll definitely want to include some docstrings within our functions – probably using the <a href="https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard">numpy docstring standard</a> (n.b.&nbsp;that DuetAI seems to be really good at generating these).</p>
+<p>We also might want to include a vignette showing a worked example of a common workflow in the package. We can create these as Jupyter notebooks within the <code>docs/</code> directory.</p>
+<p>Finally, we’ll want to render the documentation. Given our cookiecutter template, we can do this via the shell:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#add tools to render documentation</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> poetry add <span class="at">-group</span> dev myst-nb sphinx-autoapi sphinx-rtd-theme</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cd docs</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> make html</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cd ..</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>make html</code> command in the above is doing al of the heavy lifting.</p>
+<p>Then we can optionally host the documentation on Github Pages or <a href="https://about.readthedocs.com/?ref=readthedocs.org">Read the Docs</a></p>
+</section>
+<section id="step-6-tag-build-and-publish" class="level1">
+<h1>Step 6: Tag, build, and publish</h1>
+<p>These probably should be multiple steps, but whatever.</p>
+<p>When we make changes, we probably want to tag these as part of a release, via:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> git tag</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The Python Packages book has more info on tagging versions <a href="https://py-pkgs.org/03-how-to-package-a-python#tagging-a-package-release-with-version-control">here</a></p>
+<p>We can build distributions of our package via:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">poetry</span> build</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And if we want to publish our package to TestPyPI as a “dry run” before publishing to PyPI:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> poetry config repositories.test-pypi <span class="dt">\</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  https://test.pypi.org/legacy/</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> poetry publish <span class="at">-r</span> test-pypi</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pip install <span class="at">--index-url</span> https://test.pypi.org/simple/ <span class="dt">\</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--extra-index-url</span> https://pypi.org/simple <span class="dt">\</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">&lt;</span>pkg_name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And then if that works, we can publish to PyPI</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> poetry publish</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pip install <span class="op">&lt;</span>pkg_name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
