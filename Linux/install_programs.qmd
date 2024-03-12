@@ -11,7 +11,7 @@ This is a generic guide for how to download and install something in Linux.
 
 The easiest way to install something is to use the `apt` package manager. The general workflow here is to do the following:
 
-``` shell
+```bash
 sudo apt update && sudo apt upgrade
 sudo apt install package_name
 ```
@@ -28,7 +28,7 @@ To install something manually through the shell, we use a combination of `wget`,
 
 So imagine we want to install Go 1.22 (the current version at the time of writing). We could do the following:
 
-``` shell
+```bash
 VERSION=1.22.0
 OS=linux
 ARCH=amd64
@@ -49,7 +49,7 @@ This does the following:
 
 We probably then want to ensure that this is in our path, which we can do by fiddling with our `~/.bashrc` or `~/.zshrc` file (or whatever file is relevant for the shell you use). We want to look for (or add) something like this:
 
-``` shell
+```bash
 #some other stuff in your ~/.zshrc file
 export GOROOT=/usr/local/go 
 export PATH=$PATH:$GOROOT/bin
