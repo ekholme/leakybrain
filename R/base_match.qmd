@@ -1,0 +1,70 @@
+---
+title: "Base R - match"
+date: 2024-03-14
+format:
+  html:
+    code-fold: false
+---
+
+I've sort of rediscovered base R's `match()` function recently, so I figured I'd add a page here about it.
+
+Per it's documentation, match "returns a vector of the positions of (first) matches of its first argument in its second."
+
+So let's illustrate this with the following data:
+
+```{r}
+x <- 1
+y <- c(2, 3, 4, 1, 5)
+
+#we expect this to return 4 -- the index of the value 1 in y
+match(x, y)
+```
+
+And if x contains multiple elements, it does the same thing for each element:
+
+```{r}
+x <- 1:2
+
+match(x, y) 
+```
+
+And if y contains repeats of the same element, we still just get the first match:
+
+```{r}
+y <- c(y, 1) 
+
+match(x, y)
+```
+
+The cool thing for me here is what we can use this for replacements.
+
+The following code:
+
+1. draws `x`, 100 samples (with replacement) from a uniform distribution 1:10;
+2. determines `k`, the number of unique values in `x`;
+3. draws `y`, which is `k` samples from `LETTERS` (a vector containing all capital letters);
+4. creates a new vector, `x_replace` that replaces each unique value in `x` with a corresponding value of `y`. If we truly wanted to replace `x`, we would just assign this last result to back to `x`
+
+```{r}
+set.seed(0408)
+n <- 100
+x <- sample.int(10, size = n, replace = TRUE) 
+k <- length(unique(x))
+y <- sample(LETTERS, k, replace = FALSE)
+
+x_replace <- y[match(x, unique(x))]
+```
+
+And to show that this does what we think, let's look at the first 10 values of `x`:
+
+```{r}
+x[1:10]
+```
+
+as well as the first 10 values of `x_replace`:
+
+```{r}
+x_replace[1:10] 
+```
+
+and we can see that "S" corresponds to 10, "W" corresponds to 9, "U" corresponds to 1, etc.
