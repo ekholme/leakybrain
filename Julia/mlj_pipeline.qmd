@@ -6,6 +6,8 @@ date: 2023-07-07
 format:
   html:
     code-fold: false
+execute:
+  freeze: true
 jupyter: julia-1.9
 ---
 

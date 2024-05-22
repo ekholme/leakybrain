@@ -1,0 +1,14 @@
+---
+title: "Python"
+listing:
+  contents: "Python"
+  type: table
+  sort: "date desc"
+  categories: true
+  sort-ui: true
+  filter-ui: true
+  feed: true
+page-layout: full
+title-block-banner: true
+---
+

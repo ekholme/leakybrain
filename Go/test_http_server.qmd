@@ -2,7 +2,7 @@
 title: "Testing an HTTP Server"
 description: |
   A small example of testing an HTTP server endpoint
-date: today
+date: 2024-05-22
 format:
   html:
     code-fold: false

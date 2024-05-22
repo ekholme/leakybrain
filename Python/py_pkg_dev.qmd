@@ -45,7 +45,7 @@ $ .venv/Scripts/activate
 Now we can write whatever python code we want (within `/src`). Whenever we need to add a dependency, we can add it via the shell:
 
 ```bash
-$ poetry install <dependency_name>
+$ poetry add <dependency_name>
 ```
 
 We'll want to make sure we're doing this in our virtual environment.

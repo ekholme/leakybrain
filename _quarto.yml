@@ -5,7 +5,14 @@ project:
 website:
   title: "leakybrain"
   sidebar:
-    contents: auto
+    contents:
+      - gcp.qmd
+      - go.qmd
+      - julia.qmd
+      - linux.qmd
+      - python.qmd
+      - r.qmd
+      - stats.qmd
     style: "docked"
     search: true
     collapse-level: 1
@@ -20,6 +27,10 @@ format:
 
 #freeze computational output
 # see https://quarto.org/docs/projects/code-execution.html#freeze
-freeze: auto
+freeze: true
 
+#set default author
+author:
+  - name: Eric Ekholm
+    url: https://ericekholm.com
 

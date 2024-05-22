@@ -8,6 +8,7 @@ format:
     code-fold: false
 execute: 
   warning: false
+  freeze: true
 jupyter: julia-1.9
 ---
 

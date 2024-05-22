@@ -1,5 +1,6 @@
 ---
 title: "Julia Package Initialization"
+date: 2024-05-22
 ---
 
 # Interactive Pkg Creation

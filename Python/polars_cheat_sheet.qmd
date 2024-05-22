@@ -5,6 +5,9 @@ description: |
 format:
   html:
     code-fold: false
+execute:
+  freeze: true
+date: 2024-05-22
 jupyter: python3
 ---
 

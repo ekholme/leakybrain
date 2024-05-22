@@ -6,6 +6,8 @@ date: 2023-07-11
 format:
   html:
     code-fold: false
+execute:
+  freeze: true
 jupyter: python3
 ---
 

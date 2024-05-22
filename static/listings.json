@@ -1,0 +1,63 @@
+[
+  {
+    "listing": "/linux.html",
+    "items": [
+      "/Linux/install_programs.html"
+    ]
+  },
+  {
+    "listing": "/julia.html",
+    "items": [
+      "/Julia/julia_pkg_init.html",
+      "/Julia/struct_vector.html",
+      "/Julia/dataframes_cheat_sheet.html",
+      "/Julia/load_dev_pkg.html",
+      "/Julia/mlj_pipeline.html"
+    ]
+  },
+  {
+    "listing": "/gcp.html",
+    "items": [
+      "/GCP/ci_cd_cloudrun.html",
+      "/GCP/gcloud_cli_commands.html"
+    ]
+  },
+  {
+    "listing": "/go.html",
+    "items": [
+      "/Go/test_http_server.html",
+      "/Go/parse_query_params.html",
+      "/Go/post_request_validation.html",
+      "/Go/interface_composition.html"
+    ]
+  },
+  {
+    "listing": "/python.html",
+    "items": [
+      "/Python/polars_cheat_sheet.html",
+      "/Python/py_pkg_dev.html",
+      "/Python/vertex_ai_textgen.html",
+      "/Python/basics_classes.html",
+      "/Python/sklearn_pipeline.html",
+      "/Python/venv.html"
+    ]
+  },
+  {
+    "listing": "/r.html",
+    "items": [
+      "/R/color_text_ggplot.html",
+      "/R/base_match.html",
+      "/R/s3.html",
+      "/R/tidymodels_workflow.html",
+      "/R/pre_alloc_loops.html"
+    ]
+  },
+  {
+    "listing": "/stats.html",
+    "items": [
+      "/Stats/bayesian_stats.html",
+      "/Stats/gradient_descent.html",
+      "/Stats/mle_lm.html"
+    ]
+  }
+]

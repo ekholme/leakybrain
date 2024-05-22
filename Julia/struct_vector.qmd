@@ -2,10 +2,12 @@
 title: "Inititializing a Vector of Structs"
 description: |
   How to initialize a vector of structs in Julia
-date: today
+date: 2024-05-22
 format:
   html:
     code-fold: false
+execute:
+  freeze: true
 jupyter: julia-1.9
 ---
 
@@ -18,13 +20,13 @@ using Random #for creating data
 
 #define struct
 mutable struct MyType
-  x::String
-  y::Int64
-  z::Vector{Float64}
+    x::String
+    y::Int64
+    z::Vector{Float64}
 end
 
 #instantiate an example struct
-a = MyType("hello", 1, [1., 1.5, 104.1])
+a = MyType("hello", 1, [1.0, 1.5, 104.1])
 ```
 
 # Create a Constructor

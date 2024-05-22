@@ -4,9 +4,11 @@ description: |
     Illustrated using Julia
 date: "2023-04-21"
 format:
-    html:
-        code-fold: false
-jupyter: julia-1.8
+  html:
+    code-fold: false
+execute:
+  freeze: true
+jupyter: julia-1.9
 ---
 
 An example of estimating linear regression beta coefficients via gradient descent, using Julia.
@@ -29,13 +31,13 @@ Random.seed!(0408)
 𝐗 = hcat(ones(1000), randn(1000, 3))
 
 #ground truth betas
-𝚩 = [.5, 1, 2, 3]
+𝚩 = [0.5, 1, 2, 3]
 
 #multiply data by betas
-f₁(X) = X*𝚩
+f₁(X) = X * 𝚩
 
 #make some error
-ϵ = rand(Normal(0, .5), size(𝐗)[1])
+ϵ = rand(Normal(0, 0.5), size(𝐗)[1])
 
 #generate y
 y = f₁(𝐗) + ϵ;
@@ -47,9 +49,9 @@ Mean squared error is the most straightforward
 
 ```{julia}
 function mse_loss(X, y, b)
-    ŷ = X*b
+    ŷ = X * b
 
-    l = mean((y .- ŷ).^2)
+    l = mean((y .- ŷ) .^ 2)
 
     return l
 end
@@ -66,10 +68,10 @@ This implements the gradient descent algorithm:
 - define a loop that updates the beta values by the learning rate * the gradients until convergence
 
 ```{julia}
-function grad_descent(X, y; lr = .01, tol = .01, max_iter = 1_000, noisy = false)
-   #randomly initialize betas
-   β = rand(size(X)[2])
-   
+function grad_descent(X, y; lr=0.01, tol=0.01, max_iter=1_000, noisy=false)
+    #randomly initialize betas
+    β = rand(size(X)[2])
+
     #init error to something large
     err = 1e10
 
@@ -80,7 +82,7 @@ function grad_descent(X, y; lr = .01, tol = .01, max_iter = 1_000, noisy = false
     d(b) = ForwardDiff.gradient(params -> mse_loss(X, y, params), b)
 
     while err > tol && iter < max_iter
-        β -= lr*d(β)
+        β -= lr * d(β)
         err = mse_loss(X, y, β)
         if (noisy == true)
             println("Iteration $(iter): current error is $(err)")

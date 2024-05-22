@@ -2,7 +2,7 @@
 title: "gcloud CLI Commands"
 description: |
   A running list of gcloud cli commands I frequently use
-date: today
+date: 2024-05-22
 format:
   html:
     code-fold: false

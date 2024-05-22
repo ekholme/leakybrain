@@ -4,9 +4,11 @@ description: |
     Illustrated using Julia
 date: "2022-12-9"
 format:
-    html:
-        code-fold: false
-jupyter: julia-1.8
+  html:
+    code-fold: false
+execute:
+  freeze: true
+jupyter: julia-1.9
 ---
 
 An example of estimating regression coefficients in a linear model via maximum likelihood, using Julia.
@@ -27,13 +29,13 @@ Random.seed!(0408)
 𝐗 = hcat(ones(1000), randn(1000, 3))
 
 #ground truth betas
-𝚩 = [.5, 1, 2, 3]
+𝚩 = [0.5, 1, 2, 3]
 
 #multiply data by betas
-f₁(X) = X*𝚩
+f₁(X) = X * 𝚩
 
 #make some error
-ϵ = rand(Normal(0, .5), size(𝐗)[1])
+ϵ = rand(Normal(0, 0.5), size(𝐗)[1])
 
 #generate y
 y = f₁(𝐗) + ϵ;
@@ -46,7 +48,7 @@ function mle_lm(x, y, params)
     b = params[begin:end-1]
     σ = params[end]
 
-    ŷ = x*b
+    ŷ = x * b
 
     residuals = y .- ŷ
 
@@ -59,7 +61,7 @@ end
 Run the optimization
 
 ```{julia}
-start_params = [0.2, .5, 1, 1, 1]
+start_params = [0.2, 0.5, 1, 1, 1]
 
 res = optimize(params -> mle_lm(𝐗, y, params), start_params)
 

@@ -1,11 +1,12 @@
 ---
 title: "Adding Colored Text to ggplot"
-date: today
+date: 2024-05-22
 format:
   html:
     code-fold: false
 execute:
   warning: false
+  freeze: true
 ---
 
 Sometimes using colored text in lieu of a legend can make plots more appealling. This is most often the case when showing data for a small number (2 or 3) different groups.

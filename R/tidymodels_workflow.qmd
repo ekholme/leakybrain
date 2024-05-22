@@ -8,6 +8,7 @@ format:
     code-fold: false
 execute:
   warning: false
+  freeze: true
 ---
 
 Below is a minimal (yet complete) example of a machine learning pipeline that use's R's [tidymodels](https://www.tidymodels.org/) framework and the [Palmer Penguins dataset](https://allisonhorst.github.io/palmerpenguins/).
