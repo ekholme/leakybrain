@@ -1,21 +1,5 @@
 [
   {
-    "listing": "/linux.html",
-    "items": [
-      "/Linux/install_programs.html"
-    ]
-  },
-  {
-    "listing": "/julia.html",
-    "items": [
-      "/Julia/julia_pkg_init.html",
-      "/Julia/struct_vector.html",
-      "/Julia/dataframes_cheat_sheet.html",
-      "/Julia/load_dev_pkg.html",
-      "/Julia/mlj_pipeline.html"
-    ]
-  },
-  {
     "listing": "/gcp.html",
     "items": [
       "/GCP/ci_cd_cloudrun.html",
@@ -29,6 +13,23 @@
       "/Go/parse_query_params.html",
       "/Go/post_request_validation.html",
       "/Go/interface_composition.html"
+    ]
+  },
+  {
+    "listing": "/julia.html",
+    "items": [
+      "/Julia/case_when_ternary.html",
+      "/Julia/julia_pkg_init.html",
+      "/Julia/struct_vector.html",
+      "/Julia/dataframes_cheat_sheet.html",
+      "/Julia/load_dev_pkg.html",
+      "/Julia/mlj_pipeline.html"
+    ]
+  },
+  {
+    "listing": "/linux.html",
+    "items": [
+      "/Linux/install_programs.html"
     ]
   },
   {

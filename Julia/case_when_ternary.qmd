@@ -1,0 +1,29 @@
+---
+title: "Case When in Julia"
+description: |
+  case-when functionality via the ternary operator
+date: 2024-05-28
+format:
+  html:
+    code-fold: false
+jupyter: julia-1.9
+---
+
+As far as I can tell, DataFrames.jl doesn't have a built-in case-when function, but I found [this post](https://bkamins.github.io/julialang/2020/12/18/casewhen.html) from Bogumil Kaminski showing how to implement case-when via the ternary operator.
+
+Here's the basic idea, but it's also extensible to include multiple variables or to include missing values.
+
+```{julia}
+using DataFrames
+
+X = DataFrame(a = 1:10)
+```
+
+```{julia}
+transform!(
+    X,
+    :a => ByRow(a -> a % 2 == 0 ? "foo" : a % 3 == 0 ? "bar" : "baz") => :y
+);
+
+first(X, 5)
+```
