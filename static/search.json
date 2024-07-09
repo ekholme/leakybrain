@@ -7,6 +7,55 @@
     "text": "Hi, friend. I’m Eric. If you’re interested in learning more about me, you can check out my personal site, where I occassionally blog and post stuff. You can also find me on Github"
   },
   {
+    "objectID": "Databases/sqlite.html",
+    "href": "Databases/sqlite.html",
+    "title": "SQLite",
+    "section": "",
+    "text": "Disclaimer: if you’re reading this, I’m not a database expert. These are kinda notes to myself (and potentially others who stumble upon them), and they’re intended to organize my thoughts. Make of them what you will"
+  },
+  {
+    "objectID": "Databases/sqlite.html#what-is-sqlite",
+    "href": "Databases/sqlite.html#what-is-sqlite",
+    "title": "SQLite",
+    "section": "What is SQLite?",
+    "text": "What is SQLite?\nSQLite is basically a small, self-contained database that can be embedded in other applications. It’s useful for applications or devices that don’t need or want to connect to an external database like Postgres or some cloud offering.\nSQLite is nice for lots of reasons – it’s easy to install (see below), it’s typically just something you link into your application via a library, it’s minimalistic but also feature-rich (e.g. it has CTEs, full-text search, JSON compatibility). It reminds me of DuckDB is a lot of ways, but DuckDB is more intended for analytic, column-oriented workflows whereas SQLite is more intended for row-oriented operations.\nThat said, one of SQLite’s strengths (that it’s bundled with the server) is also one of its weaknesses. That is, if the application server explodes, so does the database. Pre-iCloud phones are a useful analogy. Before there were cloud backups for your phone, if you fell into a pool, all of your data on the phone was probably lost. So I guess don’t throw your SQLite-powered application server into a pool…"
+  },
+  {
+    "objectID": "Databases/sqlite.html#installing-sqlite",
+    "href": "Databases/sqlite.html#installing-sqlite",
+    "title": "SQLite",
+    "section": "Installing SQLite",
+    "text": "Installing SQLite\nThe easiest way to install sqlite – and the way you’ll do it on the vast vast majority of systems – is via apt:\n#sudo apt update && sudo apt upgrade\nsudo apt install sqlite\nThen verify the installation via:\nsqlite3 --version"
+  },
+  {
+    "objectID": "Databases/sqlite.html#creating-a-database",
+    "href": "Databases/sqlite.html#creating-a-database",
+    "title": "SQLite",
+    "section": "Creating a Database",
+    "text": "Creating a Database\nThere are a few ways to create a database. The most straightforward is as follows:\nsqlite3 demo.db\nThis will open demo.db if it exists or create it if it doesn’t.\nBut you can also open the sqlite application from the shell, then create a database from there:\nsqlite3\n.open demo.db\n*Note that just running the sqlite3 command without any arguments will connect to an in-memory database. So we’re first opening an in-memory database, then saying “actually I want to connect to demo.db instead”\nAnother way is to use a language with an SQLite3 library to do that, e.g. Python:\nimport sqlite3\n\ncon = sqlite3.connect('demo.db')"
+  },
+  {
+    "objectID": "Databases/sqlite.html#create-and-manage-tables",
+    "href": "Databases/sqlite.html#create-and-manage-tables",
+    "title": "SQLite",
+    "section": "Create and Manage Tables",
+    "text": "Create and Manage Tables\nYou create tables just like you would with any other SQL database (e.g. Postgres). That is, it uses the same SQL statements. So to create a table, we could run\nsqlite3\nthen run the following code in the terminal:\nCREATE TABLE users (\n    id INTEGER PRIMARY KEY AUTOINCREMENT\n    username TEXT UNIQUE,\n    email TEXT UNIQUE\n);\nA better approach, though, is to save the above to a .sql file, then run this file from the shell, so you don’t have to type a long SQL statement into the terminal. If that statement is saved in my_file.sql, then we could run:\nsqlite3 demo.db &lt; path/to/my_file.sql\n\nCheck Existing Tables\nTo see what tables exist in an sqlite database, run:\nsqlite3 demo.db\n.tables\n\n\nCheck the Schema of a Table\nTo see the schema of a table:\nsqlite3 demo.db\n.schema tablename"
+  },
+  {
+    "objectID": "Databases/sqlite.html#other-readings",
+    "href": "Databases/sqlite.html#other-readings",
+    "title": "SQLite",
+    "section": "Other Readings",
+    "text": "Other Readings\n\nBen Johnson’s “Im All-In on Server-Side SQLite”"
+  },
+  {
+    "objectID": "databases.html",
+    "href": "databases.html",
+    "title": "Databases",
+    "section": "",
+    "text": "Order By\n       Default\n         \n          Date - Oldest\n        \n         \n          Date - Newest\n        \n         \n          Title\n        \n         \n          Author\n        \n     \n  \n    \n      \n      \n    \n\n\n\n\n\n\nDate\n\n\nTitle\n\n\nAuthor\n\n\n\n\n\n\nJul 9, 2024\n\n\nSQLite\n\n\nEric Ekholm\n\n\n\n\n\n\nNo matching items"
+  },
+  {
     "objectID": "GCP/ci_cd_cloudrun.html",
     "href": "GCP/ci_cd_cloudrun.html",
     "title": "CI/CD with Cloud Run and Artifact Registry",

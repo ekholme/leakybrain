@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Eric Ekholm">
-<meta name="dcterms.date" content="2023-08-03">
-<meta name="description" content="A minimal example of creating and calling S3 methods">
+<meta name="dcterms.date" content="2024-07-09">
+<meta name="description" content="Notes on SQLite3">
 
-<title>leakybrain - S3 Methods</title>
+<title>leakybrain - SQLite</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -198,10 +198,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#define-a-generic" id="toc-define-a-generic" class="nav-link active" data-scroll-target="#define-a-generic">Define a Generic</a></li>
-  <li><a href="#define-and-instantiate-some-classes" id="toc-define-and-instantiate-some-classes" class="nav-link" data-scroll-target="#define-and-instantiate-some-classes">Define and Instantiate Some Classes</a></li>
-  <li><a href="#define-combine-methods-for-each-class" id="toc-define-combine-methods-for-each-class" class="nav-link" data-scroll-target="#define-combine-methods-for-each-class">Define Combine Methods for Each Class</a></li>
-  <li><a href="#call-methods" id="toc-call-methods" class="nav-link" data-scroll-target="#call-methods">Call Methods</a></li>
+  <li><a href="#what-is-sqlite" id="toc-what-is-sqlite" class="nav-link active" data-scroll-target="#what-is-sqlite">What is SQLite?</a></li>
+  <li><a href="#installing-sqlite" id="toc-installing-sqlite" class="nav-link" data-scroll-target="#installing-sqlite">Installing SQLite</a></li>
+  <li><a href="#creating-a-database" id="toc-creating-a-database" class="nav-link" data-scroll-target="#creating-a-database">Creating a Database</a></li>
+  <li><a href="#create-and-manage-tables" id="toc-create-and-manage-tables" class="nav-link" data-scroll-target="#create-and-manage-tables">Create and Manage Tables</a>
+  <ul class="collapse">
+  <li><a href="#check-existing-tables" id="toc-check-existing-tables" class="nav-link" data-scroll-target="#check-existing-tables">Check Existing Tables</a></li>
+  <li><a href="#check-the-schema-of-a-table" id="toc-check-the-schema-of-a-table" class="nav-link" data-scroll-target="#check-the-schema-of-a-table">Check the Schema of a Table</a></li>
+  </ul></li>
+  <li><a href="#other-readings" id="toc-other-readings" class="nav-link" data-scroll-target="#other-readings">Other Readings</a></li>
   </ul>
 </nav>
     </div>
@@ -210,12 +215,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">S3 Methods</h1>
+<h1 class="title">SQLite</h1>
 </div>
 
 <div>
   <div class="description">
-    <p>A minimal example of creating and calling S3 methods</p>
+    <p>Notes on SQLite3</p>
   </div>
 </div>
 
@@ -232,7 +237,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 3, 2023</p>
+      <p class="date">July 9, 2024</p>
     </div>
   </div>
   
@@ -242,75 +247,65 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<p>Below is a sort of minimal example of S3 methods, including how to define them for various classes.</p>
-<section id="define-a-generic" class="level1">
-<h1>Define a Generic</h1>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>combine <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">UseMethod</span>(<span class="st">"combine"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<p><em>Disclaimer: if you’re reading this, I’m not a database expert. These are kinda notes to myself (and potentially others who stumble upon them), and they’re intended to organize my thoughts. Make of them what you will</em></p>
+<section id="what-is-sqlite" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-sqlite">What is SQLite?</h2>
+<p><a href="https://www.sqlite.org/index.html">SQLite</a> is basically a small, self-contained database that can be embedded in other applications. It’s useful for applications or devices that don’t need or want to connect to an external database like Postgres or some cloud offering.</p>
+<p>SQLite is nice for lots of reasons – it’s easy to install (see below), it’s typically just something you link into your application via a library, it’s minimalistic but also feature-rich (e.g.&nbsp;it has CTEs, full-text search, JSON compatibility). It reminds me of DuckDB is a lot of ways, but DuckDB is more intended for analytic, column-oriented workflows whereas SQLite is more intended for row-oriented operations.</p>
+<p>That said, one of SQLite’s strengths (that it’s bundled with the server) is also one of its weaknesses. That is, if the application server explodes, so does the database. Pre-iCloud phones are a useful analogy. Before there were cloud backups for your phone, if you fell into a pool, all of your data on the phone was probably lost. So I guess don’t throw your SQLite-powered application server into a pool…</p>
 </section>
-<section id="define-and-instantiate-some-classes" class="level1">
-<h1>Define and Instantiate Some Classes</h1>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># constructor for a new instance of 'my_class'</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>new_my_class <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y) {</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stopifnot</span>(<span class="fu">is.character</span>(x) <span class="sc">&amp;</span> <span class="fu">is.character</span>(y))</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">structure</span>(</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(<span class="at">x =</span> x, <span class="at">y =</span> y),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">class =</span> <span class="st">"my_class"</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>} </span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># constructor for a new instance of 'your_class'</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>new_your_class <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y) {</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stopifnot</span>(<span class="fu">is.numeric</span>(x) <span class="sc">&amp;</span> <span class="fu">is.numeric</span>(y))</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">structure</span>(</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(<span class="at">x =</span> x, <span class="at">y =</span> y),</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">class =</span> <span class="st">"your_class"</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">new_my_class</span>(<span class="st">"aaa"</span>, <span class="st">"bbb"</span>)</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">new_your_class</span>(<span class="dv">1</span>, <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<section id="installing-sqlite" class="level2">
+<h2 class="anchored" data-anchor-id="installing-sqlite">Installing SQLite</h2>
+<p>The easiest way to install sqlite – and the way you’ll do it on the vast vast majority of systems – is via <code>apt</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#sudo apt update &amp;&amp; sudo apt upgrade</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install sqlite</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then verify the installation via:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> <span class="at">--version</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="define-combine-methods-for-each-class" class="level1">
-<h1>Define Combine Methods for Each Class</h1>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>combine.my_class <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        vctrs<span class="sc">::</span><span class="fu">field</span>(x, <span class="st">"x"</span>),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        vctrs<span class="sc">::</span><span class="fu">field</span>(x, <span class="st">"y"</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>} </span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>combine.your_class <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    a <span class="ot">&lt;-</span> vctrs<span class="sc">::</span><span class="fu">field</span>(x, <span class="st">"x"</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    b <span class="ot">&lt;-</span> vctrs<span class="sc">::</span><span class="fu">field</span>(x, <span class="st">"y"</span>)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    a <span class="sc">+</span> b</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<section id="creating-a-database" class="level2">
+<h2 class="anchored" data-anchor-id="creating-a-database">Creating a Database</h2>
+<p>There are a few ways to create a database. The most straightforward is as follows:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> demo.db</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This will open <code>demo.db</code> if it exists or create it if it doesn’t.</p>
+<p>But you can also open the <code>sqlite</code> application from the shell, then create a database from there:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">.open</span> demo.db</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>*Note that just running the <code>sqlite3</code> command without any arguments will connect to an in-memory database. So we’re first opening an in-memory database, then saying “actually I want to connect to demo.db instead”</p>
+<p>Another way is to use a language with an SQLite3 library to do that, e.g.&nbsp;Python:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sqlite3</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>con <span class="op">=</span> sqlite3.<span class="ex">connect</span>(<span class="st">'demo.db'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="call-methods" class="level1">
-<h1>Call Methods</h1>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">combine</span>(a) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "aaabbb"</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">combine</span>(b) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 3</code></pre>
-</div>
-</div>
-<p>huzzah!</p>
+<section id="create-and-manage-tables" class="level2">
+<h2 class="anchored" data-anchor-id="create-and-manage-tables">Create and Manage Tables</h2>
+<p>You create tables just like you would with any other SQL database (e.g.&nbsp;Postgres). That is, it uses the same SQL statements. So to create a table, we could run</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>then run the following code in the terminal:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> users (</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span> AUTOINCREMENT</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    username TEXT <span class="kw">UNIQUE</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    email TEXT <span class="kw">UNIQUE</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A better approach, though, is to save the above to a <code>.sql</code> file, then run this file from the shell, so you don’t have to type a long SQL statement into the terminal. If that statement is saved in <code>my_file.sql</code>, then we could run:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> demo.db <span class="op">&lt;</span> path/to/my_file.sql</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="check-existing-tables" class="level3">
+<h3 class="anchored" data-anchor-id="check-existing-tables">Check Existing Tables</h3>
+<p>To see what tables exist in an sqlite database, run:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> demo.db</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">.tables</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="check-the-schema-of-a-table" class="level3">
+<h3 class="anchored" data-anchor-id="check-the-schema-of-a-table">Check the Schema of a Table</h3>
+<p>To see the schema of a table:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> demo.db</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">.schema</span> tablename</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="other-readings" class="level2">
+<h2 class="anchored" data-anchor-id="other-readings">Other Readings</h2>
+<ul>
+<li><a href="https://fly.io/blog/all-in-on-sqlite-litestream/">Ben Johnson’s “Im All-In on Server-Side SQLite”</a></li>
+</ul>
 
 
 </section>

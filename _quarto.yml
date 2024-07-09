@@ -6,6 +6,7 @@ website:
   title: "leakybrain"
   sidebar:
     contents:
+      - databases.qmd
       - gcp.qmd
       - go.qmd
       - julia.qmd
