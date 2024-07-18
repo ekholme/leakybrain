@@ -1,0 +1,1839 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>leakybrain</title>
+<link>https://leakybrain.ericekholm.com/go.html</link>
+<atom:link href="https://leakybrain.ericekholm.com/go.xml" rel="self" type="application/rss+xml"/>
+<description></description>
+<generator>quarto-1.5.54</generator>
+<lastBuildDate>Wed, 22 May 2024 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Testing an HTTP Server</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Go/test_http_server.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This is a small example of how to test an HTTP server endpoint. I’ve gotten in the bad habit of not writing tests for my Go code, and I need to brush up on how to write tests.</p>
+<p>I’ll likely do a better version of this later that uses mocks, but for now, this will suffice.</p>
+<p>The code below is split into 3 different files:</p>
+<ul>
+<li><p><code>main.go</code> to run the application</p></li>
+<li><p><code>server.go</code> that defines all of the server logic</p></li>
+<li><p><code>server_test.go</code> that defines a test for the server’s sole endpoint</p></li>
+</ul>
+<section id="main.go" class="level2">
+<h2 class="anchored" data-anchor-id="main.go">main.go</h2>
+<p>The contents of <code>main.go</code> are:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode go code-with-copy"><code class="sourceCode go"><span id="cb1-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">package</span> main</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> main<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-4">    s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> NewServer<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span></span>
+<span id="cb1-5">    s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Run<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span></span>
+<span id="cb1-6"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+<p>This file really just bundles everything together and runs the application</p>
+</section>
+<section id="server.go" class="level2">
+<h2 class="anchored" data-anchor-id="server.go">server.go</h2>
+<p>The contents of <code>server.go</code> are:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode go code-with-copy"><code class="sourceCode go"><span id="cb2-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">package</span> main</span>
+<span id="cb2-2"></span>
+<span id="cb2-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span></span>
+<span id="cb2-4">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fmt"</span></span>
+<span id="cb2-5">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"net/http"</span></span>
+<span id="cb2-6"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb2-7"></span>
+<span id="cb2-8"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//define a user type</span></span>
+<span id="cb2-9"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> User <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">struct</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-10">    FirstName <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">string</span></span>
+<span id="cb2-11">    Age       <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span></span>
+<span id="cb2-12"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb2-13"></span>
+<span id="cb2-14"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//define a server type</span></span>
+<span id="cb2-15"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> Server <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">struct</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-16">    Srvr      <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Server</span>
+<span id="cb2-17">    UserStore <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>User</span>
+<span id="cb2-18"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb2-19"></span>
+<span id="cb2-20"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//create a new server with some dummy data included</span></span>
+<span id="cb2-21"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> NewServer<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>Server <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-22">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span>Server<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-23">        Srvr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span>http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Server<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-24">            Addr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">":8080"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb2-25">        <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">},</span></span>
+<span id="cb2-26"></span>
+<span id="cb2-27">        UserStore<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>User<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-28">            <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-29">                FirstName<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"John"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb2-30">                Age<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>       <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">29</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb2-31">            <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">},</span></span>
+<span id="cb2-32">            <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-33">                FirstName<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Kendall"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb2-34">                Age<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>       <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">32</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb2-35">            <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">},</span></span>
+<span id="cb2-36">        <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">},</span></span>
+<span id="cb2-37">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb2-38"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb2-39"></span>
+<span id="cb2-40"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//define a function to handle an endpoint requesting the user's age</span></span>
+<span id="cb2-41"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>Server<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> HandleGetUserAge<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>w http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>ResponseWriter<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> r <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Request<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-42">    q <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> r<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>URL<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Query<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span></span>
+<span id="cb2-43">    firstName <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> q<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Get<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"first_name"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb2-44"></span>
+<span id="cb2-45">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> _<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> user <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">range</span> s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>UserStore <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-46">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> user<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>FirstName <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> firstName <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-47">            w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>WriteHeader<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>StatusOK<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb2-48">            fmt<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Fprint<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> user<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Age<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb2-49">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span></span>
+<span id="cb2-50">        <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb2-51">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb2-52"></span>
+<span id="cb2-53">    w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>WriteHeader<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>StatusNotFound<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb2-54">    fmt<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Fprint<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"user not found"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb2-55"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb2-56"></span>
+<span id="cb2-57"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//run the server</span></span>
+<span id="cb2-58"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>Server<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> Run<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-59">    http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>HandleFunc<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"/user"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>HandleGetUserAge<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb2-60">    s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Srvr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>ListenAndServe<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span></span>
+<span id="cb2-61"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+<p>This is all fairly self explanatory.</p>
+</section>
+<section id="server_test.go" class="level2">
+<h2 class="anchored" data-anchor-id="server_test.go">server_test.go</h2>
+<p>The contents of <code>server_test.go</code>, which is the thing I’m actually interested in here, are:</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode go code-with-copy"><code class="sourceCode go"><span id="cb3-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">package</span> main</span>
+<span id="cb3-2"></span>
+<span id="cb3-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//write a test for the handleGetUserAge endpoint</span></span>
+<span id="cb3-4"></span>
+<span id="cb3-5"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span></span>
+<span id="cb3-6">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"net/http"</span></span>
+<span id="cb3-7">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"net/http/httptest"</span></span>
+<span id="cb3-8">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"testing"</span></span>
+<span id="cb3-9"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb3-10"></span>
+<span id="cb3-11"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> TestHandleGetUserAge<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>testing<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>T<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb3-12">    req<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> err <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>NewRequest<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"GET"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"/user?first_name=John"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">nil</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//create a request</span></span>
+<span id="cb3-13">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> err <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">nil</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb3-14">        t<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Fatal<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>err<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb3-15">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb3-16"></span>
+<span id="cb3-17">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//note that creating a mock with a datastore is probably a better way to do this, but I defined the handler above as a method on the server, so I need another server here</span></span>
+<span id="cb3-18">    s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> NewServer<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//create a new server</span></span>
+<span id="cb3-19"></span>
+<span id="cb3-20">    rr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> httptest<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>NewRecorder<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span>                    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//create a response recorder, which is a tool that lets us test http responses</span></span>
+<span id="cb3-21">    handler <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>HandlerFunc<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>HandleGetUserAge<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//create a handler function</span></span>
+<span id="cb3-22"></span>
+<span id="cb3-23">    handler<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>ServeHTTP<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>rr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> req<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//call the handler function</span></span>
+<span id="cb3-24">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//note that since rr is a pointer, its data can be updated when this handler is called</span></span>
+<span id="cb3-25"></span>
+<span id="cb3-26">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> status <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> rr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Code<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span> status <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>StatusOK <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//check the status code</span></span>
+<span id="cb3-27">        t<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Errorf<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"handler returned wrong status code: got %v want %v"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb3-28">            status<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>StatusOK<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb3-29">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb3-30"></span>
+<span id="cb3-31">    expected <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"29"</span>        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//expected response. We know this is what shoul be returned since this is John's age in the dummy data we created</span></span>
+<span id="cb3-32">    got <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> rr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Body<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>String<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//get the response body</span></span>
+<span id="cb3-33">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> got <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> expected <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//check the response body</span></span>
+<span id="cb3-34">        t<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Errorf<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"handler returned unexpected body: got %v want %v"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb3-35">            got<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> expected<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb3-36">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb3-37"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+<p>If we run the test, we’ll see that it passes.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Go/test_http_server.html</guid>
+  <pubDate>Wed, 22 May 2024 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Parsing URL Query Parameters</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Go/parse_query_params.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This is a small example of how to parse url query parameters in Go. I was learning this in service of another project, in which case I wanted the parameters in the <code>map[string]string</code> format, but this doesn’t always need to be the case.</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode go code-with-copy"><code class="sourceCode go"><span id="cb1-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">package</span> main</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span></span>
+<span id="cb1-4">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"encoding/json"</span></span>
+<span id="cb1-5">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fmt"</span></span>
+<span id="cb1-6">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"log"</span></span>
+<span id="cb1-7">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"net/http"</span></span>
+<span id="cb1-8">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"strings"</span></span>
+<span id="cb1-9"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-10"></span>
+<span id="cb1-11"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> DemoGet<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>w http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>ResponseWriter<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> r <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Request<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-12"></span>
+<span id="cb1-13">    urlParams <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> r<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>URL<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Query<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span></span>
+<span id="cb1-14"></span>
+<span id="cb1-15">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//in a use case for another project, i want the urlParams to be encoded as a map[string]string</span></span>
+<span id="cb1-16">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//but this won't always be the use case</span></span>
+<span id="cb1-17">    m <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">make</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">map</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">string</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">]</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">string</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>urlParams<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">))</span></span>
+<span id="cb1-18"></span>
+<span id="cb1-19">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">range</span> urlParams <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-20">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//in prod, we probably don't want to error out</span></span>
+<span id="cb1-21">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//but yolo for now</span></span>
+<span id="cb1-22">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>v<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-23">            log<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Fatal<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"query parameters should all be length 1"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-24">        <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-25">        s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> strings<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Join<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>v<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">""</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-26">        m<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[</span>i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">]</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> s</span>
+<span id="cb1-27">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-28"></span>
+<span id="cb1-29">    w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Header<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">().</span>Set<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Content-Type"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"application/json"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-30"></span>
+<span id="cb1-31">    json<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>NewEncoder<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">).</span>Encode<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>m<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-32"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-33"></span>
+<span id="cb1-34"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> main<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-35">    r <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>NewServeMux<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span></span>
+<span id="cb1-36"></span>
+<span id="cb1-37">    r<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>HandleFunc<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"/demoget"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> DemoGet<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-38"></span>
+<span id="cb1-39">    s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span>http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Server<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-40">        Addr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">":8080"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb1-41">        Handler<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> r<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb1-42">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-43"></span>
+<span id="cb1-44">    fmt<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Println<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Running demo program"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-45"></span>
+<span id="cb1-46">    s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>ListenAndServe<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span></span>
+<span id="cb1-47"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+
+
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Go/parse_query_params.html</guid>
+  <pubDate>Tue, 11 Jul 2023 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Validating Post Requests</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Go/post_request_validation.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This is a pretty small example of how to validate a post request in Go. It’s not at all difficult, but I’m writing this because I often forget to do this, and I’m hoping that writing it will make me remember.</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode go code-with-copy"><code class="sourceCode go"><span id="cb1-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">package</span> main</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span></span>
+<span id="cb1-4">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"encoding/json"</span></span>
+<span id="cb1-5">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fmt"</span></span>
+<span id="cb1-6">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"log"</span></span>
+<span id="cb1-7">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"net/http"</span></span>
+<span id="cb1-8"></span>
+<span id="cb1-9">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"github.com/go-playground/validator"</span></span>
+<span id="cb1-10"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-11"></span>
+<span id="cb1-12"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">const</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span></span>
+<span id="cb1-13">    listenAddr <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">string</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">":8080"</span></span>
+<span id="cb1-14"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-15"></span>
+<span id="cb1-16"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//when defining the struct, be sure to indicate validation requirements</span></span>
+<span id="cb1-17"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//you can also do something like validate:"required,email" to check that the input is an email</span></span>
+<span id="cb1-18"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> User <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">struct</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-19">    FirstName <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">string</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">`json:"firstName" validate:"required"`</span></span>
+<span id="cb1-20">    LastName  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">string</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">`json:"lastName" validate:"required"`</span></span>
+<span id="cb1-21"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-22"></span>
+<span id="cb1-23"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> handleIndex<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>w http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>ResponseWriter<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> r <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Request<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-24"></span>
+<span id="cb1-25">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">switch</span> r<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Method <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-26">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">case</span> http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>MethodGet<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb1-27">        msg <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"hello, world"</span></span>
+<span id="cb1-28"></span>
+<span id="cb1-29">        w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>WriteHeader<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>StatusOK<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-30"></span>
+<span id="cb1-31">        w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Write<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">([]</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">byte</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>msg<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">))</span></span>
+<span id="cb1-32"></span>
+<span id="cb1-33">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">case</span> http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>MethodPost<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb1-34">        <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">var</span> u <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>User</span>
+<span id="cb1-35"></span>
+<span id="cb1-36">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//create a new instance of a validator</span></span>
+<span id="cb1-37">        validate <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> validator<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>New<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span></span>
+<span id="cb1-38"></span>
+<span id="cb1-39">        json<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>NewDecoder<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>r<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Body<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">).</span>Decode<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(&amp;</span>u<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-40"></span>
+<span id="cb1-41">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//validate the struct</span></span>
+<span id="cb1-42">        err <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> validate<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Struct<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>u<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-43"></span>
+<span id="cb1-44">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> err <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">nil</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-45">            http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Error<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"invalid request"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>StatusBadRequest<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-46">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span></span>
+<span id="cb1-47">        <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-48"></span>
+<span id="cb1-49">        msg <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"hello, "</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> u<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>FirstName <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">" "</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> u<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>LastName</span>
+<span id="cb1-50"></span>
+<span id="cb1-51">        w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>WriteHeader<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>StatusOK<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-52"></span>
+<span id="cb1-53">        w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Write<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">([]</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">byte</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>msg<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">))</span></span>
+<span id="cb1-54">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">default</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span></span>
+<span id="cb1-55">        http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Error<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>w<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"method not allowed"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>StatusMethodNotAllowed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-56">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-57"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-58"></span>
+<span id="cb1-59"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> main<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-60">    r <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>NewServeMux<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span></span>
+<span id="cb1-61"></span>
+<span id="cb1-62">    r<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>HandleFunc<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"/"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> handleIndex<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-63"></span>
+<span id="cb1-64">    fmt<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Println<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Running server"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-65"></span>
+<span id="cb1-66">    err <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> http<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>ListenAndServe<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>listenAddr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> r<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-67"></span>
+<span id="cb1-68">    log<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Fatal<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>err<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-69"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+
+
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Go/post_request_validation.html</guid>
+  <pubDate>Wed, 21 Jun 2023 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Interface Composition</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Go/interface_composition.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>One cool feature of Go is that it lets you compose interfaces using other interfaces. The prototypical example of this is the <a href="https://pkg.go.dev/io#ReadWriter">ReadWriter</a>, which is composed of the Reader interface and the Writer interface.</p>
+<p>Below is an example of a toy program that defines a UserStorer interface and an ItemStorer interface, then a Storer interface that is composed of these interfaces</p>
+<section id="define-user-stuff" class="level2">
+<h2 class="anchored" data-anchor-id="define-user-stuff">Define User Stuff</h2>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode go code-with-copy"><code class="sourceCode go"><span id="cb1-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">package</span> main</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">import</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span></span>
+<span id="cb1-4">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"encoding/json"</span></span>
+<span id="cb1-5">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fmt"</span></span>
+<span id="cb1-6"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-7"></span>
+<span id="cb1-8"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//create type</span></span>
+<span id="cb1-9"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> User <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">struct</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-10">    Name <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">string</span></span>
+<span id="cb1-11">    Age  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span></span>
+<span id="cb1-12"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-13"></span>
+<span id="cb1-14"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//create interface</span></span>
+<span id="cb1-15"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> UserStorer <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">interface</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-16">    AddUser<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>users <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>User<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> user <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>User<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>User</span>
+<span id="cb1-17"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-18"></span>
+<span id="cb1-19"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//define an empty struct that will implement interface</span></span>
+<span id="cb1-20"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> ustore <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">struct</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{}</span></span>
+<span id="cb1-21"></span>
+<span id="cb1-22"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//constructor</span></span>
+<span id="cb1-23"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> NewUserStore<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span> UserStorer <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-24">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span>ustore<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{}</span></span>
+<span id="cb1-25"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-26"></span>
+<span id="cb1-27"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>us ustore<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> AddUser<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>users <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>User<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> user <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>User<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>User <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-28"></span>
+<span id="cb1-29">    users <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">append</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>users<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> user<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb1-30"></span>
+<span id="cb1-31">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> users</span>
+<span id="cb1-32"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+</section>
+<section id="define-item-stuff" class="level2">
+<h2 class="anchored" data-anchor-id="define-item-stuff">Define Item Stuff</h2>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode go code-with-copy"><code class="sourceCode go"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//define type</span></span>
+<span id="cb2-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> Item <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">struct</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-3">    Name  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">string</span></span>
+<span id="cb2-4">    Usage <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">string</span></span>
+<span id="cb2-5"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb2-6"></span>
+<span id="cb2-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//define interface</span></span>
+<span id="cb2-8"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> ItemStorer <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">interface</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-9">    AddItem<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>Item<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> item <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>Item<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>Item</span>
+<span id="cb2-10"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb2-11"></span>
+<span id="cb2-12"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//define empty struct that will implement interface</span></span>
+<span id="cb2-13"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> istore <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">struct</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{}</span></span>
+<span id="cb2-14"></span>
+<span id="cb2-15"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//define constructor</span></span>
+<span id="cb2-16"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> NewItemStore<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span> ItemStorer <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-17">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span>istore<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{}</span></span>
+<span id="cb2-18"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb2-19"></span>
+<span id="cb2-20"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//define add method</span></span>
+<span id="cb2-21"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>is istore<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> AddItem<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>Item<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> item <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>Item<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>Item <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb2-22"></span>
+<span id="cb2-23">    items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">append</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>items<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> item<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb2-24"></span>
+<span id="cb2-25">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> items</span>
+<span id="cb2-26"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+</section>
+<section id="define-storer-stuff" class="level2">
+<h2 class="anchored" data-anchor-id="define-storer-stuff">Define Storer Stuff</h2>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode go code-with-copy"><code class="sourceCode go"><span id="cb3-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> Storer <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">interface</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb3-2">    UserStorer</span>
+<span id="cb3-3">    ItemStorer</span>
+<span id="cb3-4"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb3-5"></span>
+<span id="cb3-6"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> myStore <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">struct</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb3-7">    UserStorer</span>
+<span id="cb3-8">    ItemStorer</span>
+<span id="cb3-9"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb3-10"></span>
+<span id="cb3-11"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> NewStorer<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>us UserStorer<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> is ItemStorer<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span> Storer <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb3-12"></span>
+<span id="cb3-13">    s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span>myStore<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb3-14">        UserStorer<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> us<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb3-15">        ItemStorer<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> is<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb3-16">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb3-17"></span>
+<span id="cb3-18">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> s</span>
+<span id="cb3-19"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+</section>
+<section id="create-simple-program" class="level2">
+<h2 class="anchored" data-anchor-id="create-simple-program">Create Simple Program</h2>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode go code-with-copy"><code class="sourceCode go"><span id="cb4-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">func</span> main<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb4-2"></span>
+<span id="cb4-3">    us <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> NewUserStore<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span></span>
+<span id="cb4-4">    is <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> NewItemStore<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">()</span></span>
+<span id="cb4-5"></span>
+<span id="cb4-6">    s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> NewStorer<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>us<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> is<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb4-7"></span>
+<span id="cb4-8">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">var</span> items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>Item</span>
+<span id="cb4-9">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">var</span> users <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">[]*</span>User</span>
+<span id="cb4-10"></span>
+<span id="cb4-11">    u <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span>User<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb4-12">        Name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Eric"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb4-13">        Age<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>  <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">34</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb4-14">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb4-15"></span>
+<span id="cb4-16">    i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span>Item<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb4-17">        Name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>  <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Phone"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb4-18">        Usage<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"texting"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb4-19">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb4-20"></span>
+<span id="cb4-21">    items <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>AddItem<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>items<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb4-22">    users <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>AddUser<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>users<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> u<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb4-23"></span>
+<span id="cb4-24">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//embed to json</span></span>
+<span id="cb4-25">    ji<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> _ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> json<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Marshal<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>items<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb4-26">    ju<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> _ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:=</span> json<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Marshal<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>users<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">)</span></span>
+<span id="cb4-27"></span>
+<span id="cb4-28">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//print out results</span></span>
+<span id="cb4-29">    fmt<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Println<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">string</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>ji<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">))</span></span>
+<span id="cb4-30">    fmt<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>Println<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">string</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">(</span>ju<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">))</span></span>
+<span id="cb4-31"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Go/interface_composition.html</guid>
+  <pubDate>Thu, 09 Mar 2023 05:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>

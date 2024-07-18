@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>leakybrain</title>
+<link>https://leakybrain.ericekholm.com/gcp.html</link>
+<atom:link href="https://leakybrain.ericekholm.com/gcp.xml" rel="self" type="application/rss+xml"/>
+<description></description>
+<generator>quarto-1.5.54</generator>
+<lastBuildDate>Wed, 22 May 2024 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>CI/CD with Cloud Run and Artifact Registry</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/GCP/ci_cd_cloudrun.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Below is an example <code>cloudbuild.yaml</code> file that will:</p>
+<ol type="1">
+<li><p>Build a Docker image using <a href="https://cloud.google.com/build?hl=en">Cloud Build</a></p></li>
+<li><p>Push the built image to <a href="https://cloud.google.com/artifact-registry">Artifact Registry</a></p></li>
+<li><p>Deploy the image to <a href="https://cloud.google.com/run?hl=en">Cloud Run</a></p></li>
+</ol>
+<p>There may be some additional setup/service account permissions that need to be specified (I’ll update this later once I sort these out), but at the very least, we need to create a repository in Artifact Registry first. To do that, run the following in <code>gcloud</code>:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">gcloud</span> artifacts repositories create REPO_NAME <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--format</span> docker <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--region</span> us-east4</span></code></pre></div>
+<p>From there, the <code>cloudbuild.yaml</code> file should look like this:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">steps</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span></span>
+<span id="cb2-2"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">  #docker build </span></span>
+<span id="cb2-3"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">name</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'gcr.io/cloud-builders/docker'</span></span>
+<span id="cb2-4"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">args</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">[</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'build'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'-t'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span></span>
+<span id="cb2-5"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">            </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span></span>
+<span id="cb2-6"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">            </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'.'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">]</span></span>
+<span id="cb2-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">  #docker push to artifact registry</span></span>
+<span id="cb2-8"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">name</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'gcr.io/cloud-builders/docker'</span></span>
+<span id="cb2-9"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">args</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">[</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'push'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">]</span></span>
+<span id="cb2-10"></span>
+<span id="cb2-11"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">  #deploy the container to cloud run</span></span>
+<span id="cb2-12"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">  </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">-</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">name</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'gcr.io/cloud-builders/gcloud'</span></span>
+<span id="cb2-13"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">    </span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">args</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">[</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'run'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'deploy'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'SERVICE-NAME'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'--image'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'--region'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">,</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> </span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'us-east4'</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">]</span></span>
+<span id="cb2-14"></span>
+<span id="cb2-15"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#optional but prob worth setting</span></span>
+<span id="cb2-16"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">timeout</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">:</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;"> 3600s</span></span></code></pre></div>
+<p>And then replace anything in ALL_CAPS above (without a $) with the relevant values</p>
+
+
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/GCP/ci_cd_cloudrun.html</guid>
+  <pubDate>Wed, 22 May 2024 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>gcloud CLI Commands</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/GCP/gcloud_cli_commands.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="check-projects" class="level1">
+<h1>Check Projects</h1>
+<p>To list all of your projects:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">gcloud</span> projects list</span></code></pre></div>
+<p>To check which project is your default project:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">gcloud</span> config get-value project</span></code></pre></div>
+<p>To set which project is your default project:</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">gcloud</span> config set project <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">[</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">PROJECT_ID</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">]</span></span></code></pre></div>
+</section>
+<section id="cloud-storage" class="level1">
+<h1>Cloud Storage</h1>
+<p>To push data to a cloud storage bucket:</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">gcloud</span> storage cp PATH/TO/LOCAL/FILE.PARQUET gs://BUCKET_NAME</span></code></pre></div>
+<p>Note that <code>cp</code> in the above command means “copy.” See other flags/options <a href="https://cloud.google.com/sdk/gcloud/reference/storage/cp">here</a></p>
+</section>
+<section id="app-engine" class="level1">
+<h1>App Engine</h1>
+<p>To deploy an app to App Engine:</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">gcloud</span> app deploy</span></code></pre></div>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/GCP/gcloud_cli_commands.html</guid>
+  <pubDate>Wed, 22 May 2024 04:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>

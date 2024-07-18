@@ -2,25 +2,104 @@
 title: "Gradient Descent"
 description: |
     Illustrated using Julia
-date: "2023-04-21"
+date: 2024-07-17
 format:
   html:
     code-fold: false
 execute:
   freeze: true
-jupyter: julia-1.9
+engine: julia
 ---
 
-An example of estimating linear regression beta coefficients via gradient descent, using Julia.
+## What is Gradient Descent?
+
+Gradient Descent, or Stochastic Gradient Descent, is a machine learning algorithm that optimizes parameter estimates for a model by (slowly) adjusting the estimates according to gradients (partial derivatives) and some loss function. The 7 "steps" of gradient descent, according to Jeremy Howard's fastai course on deep learning, are:
+
+1. Initialize the parameters;
+2. Use parameters and input data to predict an outcome;
+3. Calculate the model's loss;
+4. Calculate the gradient (partial derivative for each model parameter);
+5. Update the parameter estimates using the gradient multiplied by some learning rate;
+6. Repeat steps 2-5;
+7. Stop according to some criteria (number of iterations, hitting a threshold re: model improvement).
+
+The gradient descent algorithm is flexible enough to optimize the parameter estimates of arbitrary (but differentiable) functions, which makes it useful for machine learning, and deep learning in particular.
+
+## A Simple Illustration
 
 ```{julia}
 using Random
 using ForwardDiff
 using Distributions
 using Statistics
+using Plots
 ```
 
-# Generate Data
+
+To illustrate a simple version of this, let's consider the quadratic function. Imagine this is the function we want to minimize -- that is, we want to find the value of `x` that produces the smallest `y`. In a quadratic function, we know there's 1 solution that minimizes `y`, which is `x=0`, so it's a clean illustration.
+
+```{julia}
+f(x) = x^2
+
+x = -5:0.1:5
+y = f.(x)
+
+plot(x, y, label="Function to Minimize")
+```
+
+Next, we can just initiate a random value, `z` that we want to evaluate the function at:
+
+```{julia}
+z = -3.5
+scatter!([z], f.([z]), label="Starting Value")
+```
+
+We then take the gradient (the derivative in this case, but it's the same thing) of the function with respect to `z`, which gives us the rate of change of `f(x)` at `x = z`
+
+```{julia}
+grad_f = ForwardDiff.derivative(f, z)
+```
+
+So the way we think about this is that the slope of the line that's tangent to `f(x)` at `x = -3.5` is `-7`. And flashing back to calculus, we know that if `f(x) = x^2`, then `f'(x) = 2x`, and `2*(-3.5) = -7`, so this all checks out.
+
+From here, we can write out the derivative `f_prime()`, plus a convenience function that will plot the tangent line at $x_0$ accross some range of values, `x`.
+```{julia}
+f_prime(x) = 2x
+
+tangent_line(x₀) = (x -> f(x₀) + f_prime(x₀) * (x - x₀))
+
+plot!(tangent_line(z), -4.5:0.1:-2, label="Tangent at x = -3.5")
+```
+
+Then we update the value of z (which we're trying to minimize) by multiplying the gradient (-7) by some learning rate, which we want to be pretty small so parameter updates aren't bouncing around too much.
+
+```{julia}
+lr = 0.1
+
+z2 = z - lr * grad_f
+
+scatter!([z2], f.([z2]), label="Update 1")
+plot!(tangent_line(z2), -4.5:0.1:-1, label="Tangent at Update 1")
+
+```
+
+And then we run the updates a few more times, etc.
+
+```{julia}
+grad_f2 = ForwardDiff.derivative(f, z2)
+
+z3 = z2 - lr * grad_f2
+
+scatter!([z3], f.([z3]), label="Update 2")
+```
+
+We'd continue this until we hit some stopping criteria, like a predefined number of iterations or some threshold where our loss stops improving by much.
+
+## Estimating Linear Regression Parameters
+
+Like we said earlier, the algorithm is pretty flexible, so we can use it to estimate the parameters of a linear regression model.
+
+### Generate Data
 
 First, we generate some fake data
 
@@ -43,9 +122,9 @@ f₁(X) = X * 𝚩
 y = f₁(𝐗) + ϵ;
 ``` 
 
-# Define a Loss Function
+### Define a Loss Function
 
-Mean squared error is the most straightforward
+Once we have fake data, we want to define some loss function to minimize. This tells us how well our model is predicting the training data, so small losses are better. There are a few options we could use, but mean squared error is the probably most straightforward:
 
 ```{julia}
 function mse_loss(X, y, b)
@@ -57,14 +136,15 @@ function mse_loss(X, y, b)
 end
 ```
 
-# Define a training function
 
-This implements the gradient descent algorithm:
+### Define a training function
+
+Now we can write a function that implements the algorithm. In this fucntion, we:
 
 - initialize some random beta values
 - initialize error as some very large number (the init value doesn't really matter as long as it's greater than the function's `tol` parameter)
 - initialize the number of iterations (`iter`) at 0
-- define a function `d()` to get the gradient of the loss function at a given set of betas
+- define a helper function `d()` to get the gradient of the loss function at a given set of betas
 - define a loop that updates the beta values by the learning rate * the gradients until convergence
 
 ```{julia}
@@ -93,7 +173,7 @@ function grad_descent(X, y; lr=0.01, tol=0.01, max_iter=1_000, noisy=false)
 end
 ```
 
-# Estimate βs
+### Estimate βs
 
 To estimate the betas, we just run the function
 
@@ -101,10 +181,12 @@ To estimate the betas, we just run the function
 b = grad_descent(𝐗, y)
 ```
 
-# Check Solution Against Base Julia Solver
+### Check Solution Against Base Julia Solver
+
+To prove that we got the right parameters (which we already know, since we chose them when we simulated the data), we can just check them again the answers provided by the base Julia solver.
 
 ```{julia}
 𝐗 \ y .≈ b
 ```
 
-huzzah!
+And we can see they check out.

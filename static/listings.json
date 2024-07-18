@@ -1,24 +1,8 @@
 [
   {
-    "listing": "/databases.html",
+    "listing": "/linux.html",
     "items": [
-      "/Databases/sqlite.html"
-    ]
-  },
-  {
-    "listing": "/gcp.html",
-    "items": [
-      "/GCP/ci_cd_cloudrun.html",
-      "/GCP/gcloud_cli_commands.html"
-    ]
-  },
-  {
-    "listing": "/go.html",
-    "items": [
-      "/Go/test_http_server.html",
-      "/Go/parse_query_params.html",
-      "/Go/post_request_validation.html",
-      "/Go/interface_composition.html"
+      "/Linux/install_programs.html"
     ]
   },
   {
@@ -33,9 +17,25 @@
     ]
   },
   {
-    "listing": "/linux.html",
+    "listing": "/go.html",
     "items": [
-      "/Linux/install_programs.html"
+      "/Go/test_http_server.html",
+      "/Go/parse_query_params.html",
+      "/Go/post_request_validation.html",
+      "/Go/interface_composition.html"
+    ]
+  },
+  {
+    "listing": "/databases.html",
+    "items": [
+      "/Databases/sqlite.html"
+    ]
+  },
+  {
+    "listing": "/gcp.html",
+    "items": [
+      "/GCP/ci_cd_cloudrun.html",
+      "/GCP/gcloud_cli_commands.html"
     ]
   },
   {
@@ -62,8 +62,8 @@
   {
     "listing": "/stats.html",
     "items": [
-      "/Stats/bayesian_stats.html",
       "/Stats/gradient_descent.html",
+      "/Stats/bayesian_stats.html",
       "/Stats/mle_lm.html"
     ]
   }

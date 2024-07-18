@@ -1,0 +1,4035 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>leakybrain</title>
+<link>https://leakybrain.ericekholm.com/python.html</link>
+<atom:link href="https://leakybrain.ericekholm.com/python.xml" rel="self" type="application/rss+xml"/>
+<description></description>
+<generator>quarto-1.5.54</generator>
+<lastBuildDate>Wed, 22 May 2024 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Polars Cheat Sheet</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Python/polars_cheat_sheet.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="setup-read-in-data" class="level1">
+<h1>Setup &amp; Read in Data</h1>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> polars.selectors <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> cs</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> pl</span>
+<span id="cb1-3"></span>
+<span id="cb1-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># read in data</span></span>
+<span id="cb1-5">penguins <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pl.read_csv(</span>
+<span id="cb1-6">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv"</span>,</span>
+<span id="cb1-7">    null_values<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"NA"</span>,</span>
+<span id="cb1-8">)</span></code></pre></div>
+</div>
+</section>
+<section id="check-properties-of-a-dataframe" class="level1">
+<h1>Check Properties of a Dataframe</h1>
+<p>use the <code>shape</code> attribute to check the dimensions (rows, cols)</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">penguins.shape</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>(344, 8)</code></pre>
+</div>
+</div>
+<p>use the <code>head()</code> method to see the first few rows</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">penguins.head()</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (5, 8)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">island</th>
+<th data-quarto-table-cell-role="th">bill_length_mm</th>
+<th data-quarto-table-cell-role="th">bill_depth_mm</th>
+<th data-quarto-table-cell-role="th">flipper_length_mm</th>
+<th data-quarto-table-cell-role="th">body_mass_g</th>
+<th data-quarto-table-cell-role="th">sex</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+<th>f64</th>
+<th>f64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>i64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.1</td>
+<td>18.7</td>
+<td>181</td>
+<td>3750</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.5</td>
+<td>17.4</td>
+<td>186</td>
+<td>3800</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>40.3</td>
+<td>18.0</td>
+<td>195</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>36.7</td>
+<td>19.3</td>
+<td>193</td>
+<td>3450</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>to see the column names, we can use the <code>columns</code> attribute</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">penguins.columns</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>['species',
+ 'island',
+ 'bill_length_mm',
+ 'bill_depth_mm',
+ 'flipper_length_mm',
+ 'body_mass_g',
+ 'sex',
+ 'year']</code></pre>
+</div>
+</div>
+</section>
+<section id="subset-rows" class="level1">
+<h1>Subset Rows</h1>
+<p>For the most part, we want to subset rows using the <code>filter()</code> method.</p>
+<p>For example, we might want to filter out rows that aren’t missing data for the body mass variable</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">penguins.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">filter</span>(pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"body_mass_g"</span>).is_not_null())</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (342, 8)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">island</th>
+<th data-quarto-table-cell-role="th">bill_length_mm</th>
+<th data-quarto-table-cell-role="th">bill_depth_mm</th>
+<th data-quarto-table-cell-role="th">flipper_length_mm</th>
+<th data-quarto-table-cell-role="th">body_mass_g</th>
+<th data-quarto-table-cell-role="th">sex</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+<th>f64</th>
+<th>f64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>i64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.1</td>
+<td>18.7</td>
+<td>181</td>
+<td>3750</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.5</td>
+<td>17.4</td>
+<td>186</td>
+<td>3800</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>40.3</td>
+<td>18.0</td>
+<td>195</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>36.7</td>
+<td>19.3</td>
+<td>193</td>
+<td>3450</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.3</td>
+<td>20.6</td>
+<td>190</td>
+<td>3650</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>38.9</td>
+<td>17.8</td>
+<td>181</td>
+<td>3625</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.2</td>
+<td>19.6</td>
+<td>195</td>
+<td>4675</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>34.1</td>
+<td>18.1</td>
+<td>193</td>
+<td>3475</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>42.0</td>
+<td>20.2</td>
+<td>190</td>
+<td>4250</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>37.8</td>
+<td>17.1</td>
+<td>186</td>
+<td>3300</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>37.8</td>
+<td>17.3</td>
+<td>180</td>
+<td>3700</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>41.1</td>
+<td>17.6</td>
+<td>182</td>
+<td>3200</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.2</td>
+<td>16.6</td>
+<td>191</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>49.3</td>
+<td>19.9</td>
+<td>203</td>
+<td>4050</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.2</td>
+<td>18.8</td>
+<td>202</td>
+<td>3800</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.6</td>
+<td>19.4</td>
+<td>194</td>
+<td>3525</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>51.9</td>
+<td>19.5</td>
+<td>206</td>
+<td>3950</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>46.8</td>
+<td>16.5</td>
+<td>189</td>
+<td>3650</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.7</td>
+<td>17.0</td>
+<td>195</td>
+<td>3650</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>55.8</td>
+<td>19.8</td>
+<td>207</td>
+<td>4000</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>43.5</td>
+<td>18.1</td>
+<td>202</td>
+<td>3400</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>49.6</td>
+<td>18.2</td>
+<td>193</td>
+<td>3775</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.8</td>
+<td>19.0</td>
+<td>210</td>
+<td>4100</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.2</td>
+<td>18.7</td>
+<td>198</td>
+<td>3775</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Basically, filter keeps rows where the expression evaluates to <code>True</code>. And so we can use any predicate expression that results in a boolean. We can also use multiple expressions.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">penguins.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">filter</span>((pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Adelie"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> (pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bill_length_mm"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">39.0</span>))</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (72, 8)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">island</th>
+<th data-quarto-table-cell-role="th">bill_length_mm</th>
+<th data-quarto-table-cell-role="th">bill_depth_mm</th>
+<th data-quarto-table-cell-role="th">flipper_length_mm</th>
+<th data-quarto-table-cell-role="th">body_mass_g</th>
+<th data-quarto-table-cell-role="th">sex</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+<th>f64</th>
+<th>f64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>i64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.1</td>
+<td>18.7</td>
+<td>181</td>
+<td>3750</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.5</td>
+<td>17.4</td>
+<td>186</td>
+<td>3800</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>40.3</td>
+<td>18.0</td>
+<td>195</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.3</td>
+<td>20.6</td>
+<td>190</td>
+<td>3650</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.2</td>
+<td>19.6</td>
+<td>195</td>
+<td>4675</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>42.0</td>
+<td>20.2</td>
+<td>190</td>
+<td>4250</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>41.1</td>
+<td>17.6</td>
+<td>182</td>
+<td>3200</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>42.5</td>
+<td>20.7</td>
+<td>197</td>
+<td>4500</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>46.0</td>
+<td>21.5</td>
+<td>194</td>
+<td>4200</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Biscoe"</td>
+<td>40.6</td>
+<td>18.6</td>
+<td>183</td>
+<td>3550</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Biscoe"</td>
+<td>40.5</td>
+<td>17.9</td>
+<td>187</td>
+<td>3200</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Biscoe"</td>
+<td>40.5</td>
+<td>18.9</td>
+<td>180</td>
+<td>3950</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.0</td>
+<td>17.1</td>
+<td>191</td>
+<td>3050</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>44.1</td>
+<td>18.0</td>
+<td>210</td>
+<td>4000</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>43.1</td>
+<td>19.2</td>
+<td>197</td>
+<td>3500</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Dream"</td>
+<td>41.1</td>
+<td>17.5</td>
+<td>190</td>
+<td>3900</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Dream"</td>
+<td>40.2</td>
+<td>20.1</td>
+<td>200</td>
+<td>3975</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Dream"</td>
+<td>39.7</td>
+<td>17.9</td>
+<td>193</td>
+<td>4250</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Dream"</td>
+<td>40.2</td>
+<td>17.1</td>
+<td>193</td>
+<td>3400</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Dream"</td>
+<td>40.6</td>
+<td>17.2</td>
+<td>187</td>
+<td>3475</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Dream"</td>
+<td>40.7</td>
+<td>17.0</td>
+<td>190</td>
+<td>3725</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Dream"</td>
+<td>39.0</td>
+<td>18.7</td>
+<td>185</td>
+<td>3650</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Dream"</td>
+<td>39.2</td>
+<td>18.6</td>
+<td>190</td>
+<td>4250</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Dream"</td>
+<td>41.5</td>
+<td>18.5</td>
+<td>201</td>
+<td>4000</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>We might also want to filter based on string matches. For example, strings that start with a certain substring</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">penguins.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">filter</span>(pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>.starts_with(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Chin"</span>))</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (68, 8)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">island</th>
+<th data-quarto-table-cell-role="th">bill_length_mm</th>
+<th data-quarto-table-cell-role="th">bill_depth_mm</th>
+<th data-quarto-table-cell-role="th">flipper_length_mm</th>
+<th data-quarto-table-cell-role="th">body_mass_g</th>
+<th data-quarto-table-cell-role="th">sex</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+<th>f64</th>
+<th>f64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>i64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>46.5</td>
+<td>17.9</td>
+<td>192</td>
+<td>3500</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.0</td>
+<td>19.5</td>
+<td>196</td>
+<td>3900</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>51.3</td>
+<td>19.2</td>
+<td>193</td>
+<td>3650</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.4</td>
+<td>18.7</td>
+<td>188</td>
+<td>3525</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>52.7</td>
+<td>19.8</td>
+<td>197</td>
+<td>3725</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.2</td>
+<td>17.8</td>
+<td>198</td>
+<td>3950</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>46.1</td>
+<td>18.2</td>
+<td>178</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>51.3</td>
+<td>18.2</td>
+<td>197</td>
+<td>3750</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>46.0</td>
+<td>18.9</td>
+<td>195</td>
+<td>4150</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>51.3</td>
+<td>19.9</td>
+<td>198</td>
+<td>3700</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>46.6</td>
+<td>17.8</td>
+<td>193</td>
+<td>3800</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>51.7</td>
+<td>20.3</td>
+<td>194</td>
+<td>3775</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.2</td>
+<td>16.6</td>
+<td>191</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>49.3</td>
+<td>19.9</td>
+<td>203</td>
+<td>4050</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.2</td>
+<td>18.8</td>
+<td>202</td>
+<td>3800</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.6</td>
+<td>19.4</td>
+<td>194</td>
+<td>3525</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>51.9</td>
+<td>19.5</td>
+<td>206</td>
+<td>3950</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>46.8</td>
+<td>16.5</td>
+<td>189</td>
+<td>3650</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.7</td>
+<td>17.0</td>
+<td>195</td>
+<td>3650</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>55.8</td>
+<td>19.8</td>
+<td>207</td>
+<td>4000</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>43.5</td>
+<td>18.1</td>
+<td>202</td>
+<td>3400</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>49.6</td>
+<td>18.2</td>
+<td>193</td>
+<td>3775</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.8</td>
+<td>19.0</td>
+<td>210</td>
+<td>4100</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.2</td>
+<td>18.7</td>
+<td>198</td>
+<td>3775</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="subset-columns" class="level1">
+<h1>Subset Columns</h1>
+<p>To subset columns, we want to use the <code>select()</code> method.</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">penguins.select(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (344, 1)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Adelie"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>To select multiple columns, we pass in a list</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">penguins.select([<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"island"</span>])</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (344, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">island</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>To select columns with regex, we can pass regex to <code>pl.col()</code>. Note that we need to indicate this is regex by passing both ^ and $.</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">penguins.select(pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"^bill_.*$"</span>))</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (344, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">bill_length_mm</th>
+<th data-quarto-table-cell-role="th">bill_depth_mm</th>
+</tr>
+<tr class="odd">
+<th>f64</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>39.1</td>
+<td>18.7</td>
+</tr>
+<tr class="even">
+<td>39.5</td>
+<td>17.4</td>
+</tr>
+<tr class="odd">
+<td>40.3</td>
+<td>18.0</td>
+</tr>
+<tr class="even">
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>36.7</td>
+<td>19.3</td>
+</tr>
+<tr class="even">
+<td>39.3</td>
+<td>20.6</td>
+</tr>
+<tr class="odd">
+<td>38.9</td>
+<td>17.8</td>
+</tr>
+<tr class="even">
+<td>39.2</td>
+<td>19.6</td>
+</tr>
+<tr class="odd">
+<td>34.1</td>
+<td>18.1</td>
+</tr>
+<tr class="even">
+<td>42.0</td>
+<td>20.2</td>
+</tr>
+<tr class="odd">
+<td>37.8</td>
+<td>17.1</td>
+</tr>
+<tr class="even">
+<td>37.8</td>
+<td>17.3</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>45.2</td>
+<td>16.6</td>
+</tr>
+<tr class="odd">
+<td>49.3</td>
+<td>19.9</td>
+</tr>
+<tr class="even">
+<td>50.2</td>
+<td>18.8</td>
+</tr>
+<tr class="odd">
+<td>45.6</td>
+<td>19.4</td>
+</tr>
+<tr class="even">
+<td>51.9</td>
+<td>19.5</td>
+</tr>
+<tr class="odd">
+<td>46.8</td>
+<td>16.5</td>
+</tr>
+<tr class="even">
+<td>45.7</td>
+<td>17.0</td>
+</tr>
+<tr class="odd">
+<td>55.8</td>
+<td>19.8</td>
+</tr>
+<tr class="even">
+<td>43.5</td>
+<td>18.1</td>
+</tr>
+<tr class="odd">
+<td>49.6</td>
+<td>18.2</td>
+</tr>
+<tr class="even">
+<td>50.8</td>
+<td>19.0</td>
+</tr>
+<tr class="odd">
+<td>50.2</td>
+<td>18.7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>and we can also exclude by regex</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">penguins.select(pl.exclude(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"^bill_.*$"</span>))</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (344, 6)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">island</th>
+<th data-quarto-table-cell-role="th">flipper_length_mm</th>
+<th data-quarto-table-cell-role="th">body_mass_g</th>
+<th data-quarto-table-cell-role="th">sex</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>i64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>181</td>
+<td>3750</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>186</td>
+<td>3800</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>195</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>193</td>
+<td>3450</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>190</td>
+<td>3650</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>181</td>
+<td>3625</td>
+<td>"female"</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>195</td>
+<td>4675</td>
+<td>"male"</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>193</td>
+<td>3475</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>190</td>
+<td>4250</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>186</td>
+<td>3300</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>180</td>
+<td>3700</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>191</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>203</td>
+<td>4050</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>202</td>
+<td>3800</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>194</td>
+<td>3525</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>206</td>
+<td>3950</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>189</td>
+<td>3650</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>195</td>
+<td>3650</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>207</td>
+<td>4000</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>202</td>
+<td>3400</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>193</td>
+<td>3775</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>210</td>
+<td>4100</td>
+<td>"male"</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>198</td>
+<td>3775</td>
+<td>"female"</td>
+<td>2009</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Polars (via the polars.selectors module) also provides utilities similar to tidyverse selectors, such as <code>starts_with()</code></p>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">penguins.select(cs.starts_with(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bill"</span>))</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (344, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">bill_length_mm</th>
+<th data-quarto-table-cell-role="th">bill_depth_mm</th>
+</tr>
+<tr class="odd">
+<th>f64</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>39.1</td>
+<td>18.7</td>
+</tr>
+<tr class="even">
+<td>39.5</td>
+<td>17.4</td>
+</tr>
+<tr class="odd">
+<td>40.3</td>
+<td>18.0</td>
+</tr>
+<tr class="even">
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>36.7</td>
+<td>19.3</td>
+</tr>
+<tr class="even">
+<td>39.3</td>
+<td>20.6</td>
+</tr>
+<tr class="odd">
+<td>38.9</td>
+<td>17.8</td>
+</tr>
+<tr class="even">
+<td>39.2</td>
+<td>19.6</td>
+</tr>
+<tr class="odd">
+<td>34.1</td>
+<td>18.1</td>
+</tr>
+<tr class="even">
+<td>42.0</td>
+<td>20.2</td>
+</tr>
+<tr class="odd">
+<td>37.8</td>
+<td>17.1</td>
+</tr>
+<tr class="even">
+<td>37.8</td>
+<td>17.3</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>45.2</td>
+<td>16.6</td>
+</tr>
+<tr class="odd">
+<td>49.3</td>
+<td>19.9</td>
+</tr>
+<tr class="even">
+<td>50.2</td>
+<td>18.8</td>
+</tr>
+<tr class="odd">
+<td>45.6</td>
+<td>19.4</td>
+</tr>
+<tr class="even">
+<td>51.9</td>
+<td>19.5</td>
+</tr>
+<tr class="odd">
+<td>46.8</td>
+<td>16.5</td>
+</tr>
+<tr class="even">
+<td>45.7</td>
+<td>17.0</td>
+</tr>
+<tr class="odd">
+<td>55.8</td>
+<td>19.8</td>
+</tr>
+<tr class="even">
+<td>43.5</td>
+<td>18.1</td>
+</tr>
+<tr class="odd">
+<td>49.6</td>
+<td>18.2</td>
+</tr>
+<tr class="even">
+<td>50.8</td>
+<td>19.0</td>
+</tr>
+<tr class="odd">
+<td>50.2</td>
+<td>18.7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Another useful feature is selecting by data type. This is something that polars.selectors enables. For instance, if we wanted to select all numeric columns</p>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">penguins.select(cs.by_dtype(pl.NUMERIC_DTYPES))</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (344, 5)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">bill_length_mm</th>
+<th data-quarto-table-cell-role="th">bill_depth_mm</th>
+<th data-quarto-table-cell-role="th">flipper_length_mm</th>
+<th data-quarto-table-cell-role="th">body_mass_g</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+<tr class="odd">
+<th>f64</th>
+<th>f64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>39.1</td>
+<td>18.7</td>
+<td>181</td>
+<td>3750</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>39.5</td>
+<td>17.4</td>
+<td>186</td>
+<td>3800</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>40.3</td>
+<td>18.0</td>
+<td>195</td>
+<td>3250</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>36.7</td>
+<td>19.3</td>
+<td>193</td>
+<td>3450</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>39.3</td>
+<td>20.6</td>
+<td>190</td>
+<td>3650</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>38.9</td>
+<td>17.8</td>
+<td>181</td>
+<td>3625</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>39.2</td>
+<td>19.6</td>
+<td>195</td>
+<td>4675</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>34.1</td>
+<td>18.1</td>
+<td>193</td>
+<td>3475</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>42.0</td>
+<td>20.2</td>
+<td>190</td>
+<td>4250</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>37.8</td>
+<td>17.1</td>
+<td>186</td>
+<td>3300</td>
+<td>2007</td>
+</tr>
+<tr class="even">
+<td>37.8</td>
+<td>17.3</td>
+<td>180</td>
+<td>3700</td>
+<td>2007</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>45.2</td>
+<td>16.6</td>
+<td>191</td>
+<td>3250</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>49.3</td>
+<td>19.9</td>
+<td>203</td>
+<td>4050</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>50.2</td>
+<td>18.8</td>
+<td>202</td>
+<td>3800</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>45.6</td>
+<td>19.4</td>
+<td>194</td>
+<td>3525</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>51.9</td>
+<td>19.5</td>
+<td>206</td>
+<td>3950</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>46.8</td>
+<td>16.5</td>
+<td>189</td>
+<td>3650</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>45.7</td>
+<td>17.0</td>
+<td>195</td>
+<td>3650</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>55.8</td>
+<td>19.8</td>
+<td>207</td>
+<td>4000</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>43.5</td>
+<td>18.1</td>
+<td>202</td>
+<td>3400</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>49.6</td>
+<td>18.2</td>
+<td>193</td>
+<td>3775</td>
+<td>2009</td>
+</tr>
+<tr class="even">
+<td>50.8</td>
+<td>19.0</td>
+<td>210</td>
+<td>4100</td>
+<td>2009</td>
+</tr>
+<tr class="odd">
+<td>50.2</td>
+<td>18.7</td>
+<td>198</td>
+<td>3775</td>
+<td>2009</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-new-columns" class="level1">
+<h1>Creating New Columns</h1>
+<p>To create new columns, we’ll use the <code>with_columns()</code> method, which is similar to <code>dplyr::mutate()</code></p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">penguins.with_columns(is_chinstrap<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Chinstrap"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (344, 9)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">island</th>
+<th data-quarto-table-cell-role="th">bill_length_mm</th>
+<th data-quarto-table-cell-role="th">bill_depth_mm</th>
+<th data-quarto-table-cell-role="th">flipper_length_mm</th>
+<th data-quarto-table-cell-role="th">body_mass_g</th>
+<th data-quarto-table-cell-role="th">sex</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">is_chinstrap</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+<th>f64</th>
+<th>f64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>i64</th>
+<th>bool</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.1</td>
+<td>18.7</td>
+<td>181</td>
+<td>3750</td>
+<td>"male"</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.5</td>
+<td>17.4</td>
+<td>186</td>
+<td>3800</td>
+<td>"female"</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>40.3</td>
+<td>18.0</td>
+<td>195</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>36.7</td>
+<td>19.3</td>
+<td>193</td>
+<td>3450</td>
+<td>"female"</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.3</td>
+<td>20.6</td>
+<td>190</td>
+<td>3650</td>
+<td>"male"</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>38.9</td>
+<td>17.8</td>
+<td>181</td>
+<td>3625</td>
+<td>"female"</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.2</td>
+<td>19.6</td>
+<td>195</td>
+<td>4675</td>
+<td>"male"</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>34.1</td>
+<td>18.1</td>
+<td>193</td>
+<td>3475</td>
+<td>null</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>42.0</td>
+<td>20.2</td>
+<td>190</td>
+<td>4250</td>
+<td>null</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>37.8</td>
+<td>17.1</td>
+<td>186</td>
+<td>3300</td>
+<td>null</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>37.8</td>
+<td>17.3</td>
+<td>180</td>
+<td>3700</td>
+<td>null</td>
+<td>2007</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.2</td>
+<td>16.6</td>
+<td>191</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>49.3</td>
+<td>19.9</td>
+<td>203</td>
+<td>4050</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.2</td>
+<td>18.8</td>
+<td>202</td>
+<td>3800</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.6</td>
+<td>19.4</td>
+<td>194</td>
+<td>3525</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>51.9</td>
+<td>19.5</td>
+<td>206</td>
+<td>3950</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>46.8</td>
+<td>16.5</td>
+<td>189</td>
+<td>3650</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.7</td>
+<td>17.0</td>
+<td>195</td>
+<td>3650</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>55.8</td>
+<td>19.8</td>
+<td>207</td>
+<td>4000</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>43.5</td>
+<td>18.1</td>
+<td>202</td>
+<td>3400</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>49.6</td>
+<td>18.2</td>
+<td>193</td>
+<td>3775</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.8</td>
+<td>19.0</td>
+<td>210</td>
+<td>4100</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.2</td>
+<td>18.7</td>
+<td>198</td>
+<td>3775</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>We can create multiple columns at a time</p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">penguins.with_columns(</span>
+<span id="cb17-2">    is_chinstrap<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Chinstrap"</span>,</span>
+<span id="cb17-3">    chonk<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"body_mass_g"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4000</span>,</span>
+<span id="cb17-4">    bill_stuff<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bill_length_mm"</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bill_depth_mm"</span>),</span>
+<span id="cb17-5">    sex_initial<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sex"</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">slice</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>.to_uppercase(),</span>
+<span id="cb17-6">)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (344, 12)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">island</th>
+<th data-quarto-table-cell-role="th">bill_length_mm</th>
+<th data-quarto-table-cell-role="th">bill_depth_mm</th>
+<th data-quarto-table-cell-role="th">flipper_length_mm</th>
+<th data-quarto-table-cell-role="th">body_mass_g</th>
+<th data-quarto-table-cell-role="th">sex</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">is_chinstrap</th>
+<th data-quarto-table-cell-role="th">chonk</th>
+<th data-quarto-table-cell-role="th">bill_stuff</th>
+<th data-quarto-table-cell-role="th">sex_initial</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+<th>f64</th>
+<th>f64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>i64</th>
+<th>bool</th>
+<th>bool</th>
+<th>f64</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.1</td>
+<td>18.7</td>
+<td>181</td>
+<td>3750</td>
+<td>"male"</td>
+<td>2007</td>
+<td>false</td>
+<td>false</td>
+<td>57.8</td>
+<td>"M"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.5</td>
+<td>17.4</td>
+<td>186</td>
+<td>3800</td>
+<td>"female"</td>
+<td>2007</td>
+<td>false</td>
+<td>false</td>
+<td>56.9</td>
+<td>"F"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>40.3</td>
+<td>18.0</td>
+<td>195</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2007</td>
+<td>false</td>
+<td>false</td>
+<td>58.3</td>
+<td>"F"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>2007</td>
+<td>false</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>36.7</td>
+<td>19.3</td>
+<td>193</td>
+<td>3450</td>
+<td>"female"</td>
+<td>2007</td>
+<td>false</td>
+<td>false</td>
+<td>56.0</td>
+<td>"F"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.3</td>
+<td>20.6</td>
+<td>190</td>
+<td>3650</td>
+<td>"male"</td>
+<td>2007</td>
+<td>false</td>
+<td>false</td>
+<td>59.9</td>
+<td>"M"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>38.9</td>
+<td>17.8</td>
+<td>181</td>
+<td>3625</td>
+<td>"female"</td>
+<td>2007</td>
+<td>false</td>
+<td>false</td>
+<td>56.7</td>
+<td>"F"</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>39.2</td>
+<td>19.6</td>
+<td>195</td>
+<td>4675</td>
+<td>"male"</td>
+<td>2007</td>
+<td>false</td>
+<td>true</td>
+<td>58.8</td>
+<td>"M"</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>34.1</td>
+<td>18.1</td>
+<td>193</td>
+<td>3475</td>
+<td>null</td>
+<td>2007</td>
+<td>false</td>
+<td>false</td>
+<td>52.2</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>42.0</td>
+<td>20.2</td>
+<td>190</td>
+<td>4250</td>
+<td>null</td>
+<td>2007</td>
+<td>false</td>
+<td>true</td>
+<td>62.2</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>37.8</td>
+<td>17.1</td>
+<td>186</td>
+<td>3300</td>
+<td>null</td>
+<td>2007</td>
+<td>false</td>
+<td>false</td>
+<td>54.9</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"Torgersen"</td>
+<td>37.8</td>
+<td>17.3</td>
+<td>180</td>
+<td>3700</td>
+<td>null</td>
+<td>2007</td>
+<td>false</td>
+<td>false</td>
+<td>55.1</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.2</td>
+<td>16.6</td>
+<td>191</td>
+<td>3250</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+<td>false</td>
+<td>61.8</td>
+<td>"F"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>49.3</td>
+<td>19.9</td>
+<td>203</td>
+<td>4050</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+<td>true</td>
+<td>69.2</td>
+<td>"M"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.2</td>
+<td>18.8</td>
+<td>202</td>
+<td>3800</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+<td>false</td>
+<td>69.0</td>
+<td>"M"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.6</td>
+<td>19.4</td>
+<td>194</td>
+<td>3525</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+<td>false</td>
+<td>65.0</td>
+<td>"F"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>51.9</td>
+<td>19.5</td>
+<td>206</td>
+<td>3950</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+<td>false</td>
+<td>71.4</td>
+<td>"M"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>46.8</td>
+<td>16.5</td>
+<td>189</td>
+<td>3650</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+<td>false</td>
+<td>63.3</td>
+<td>"F"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>45.7</td>
+<td>17.0</td>
+<td>195</td>
+<td>3650</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+<td>false</td>
+<td>62.7</td>
+<td>"F"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>55.8</td>
+<td>19.8</td>
+<td>207</td>
+<td>4000</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+<td>true</td>
+<td>75.6</td>
+<td>"M"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>43.5</td>
+<td>18.1</td>
+<td>202</td>
+<td>3400</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+<td>false</td>
+<td>61.6</td>
+<td>"F"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>49.6</td>
+<td>18.2</td>
+<td>193</td>
+<td>3775</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+<td>false</td>
+<td>67.8</td>
+<td>"M"</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.8</td>
+<td>19.0</td>
+<td>210</td>
+<td>4100</td>
+<td>"male"</td>
+<td>2009</td>
+<td>true</td>
+<td>true</td>
+<td>69.8</td>
+<td>"M"</td>
+</tr>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"Dream"</td>
+<td>50.2</td>
+<td>18.7</td>
+<td>198</td>
+<td>3775</td>
+<td>"female"</td>
+<td>2009</td>
+<td>true</td>
+<td>false</td>
+<td>68.9</td>
+<td>"F"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>I’ll likely add more examples here as I encounter common use cases.</p>
+</section>
+<section id="summarizing-dataframes" class="level1">
+<h1>Summarizing DataFrames</h1>
+<p>Most summarizing workflows will involve the <code>groupby()</code> method, followed by some other operation.</p>
+<p>Probably the most common thing we’ll want to do is count by group</p>
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1">penguins.groupby(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"island"</span>).count()</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (3, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">island</th>
+<th data-quarto-table-cell-role="th">count</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>u32</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Dream"</td>
+<td>124</td>
+</tr>
+<tr class="even">
+<td>"Biscoe"</td>
+<td>168</td>
+</tr>
+<tr class="odd">
+<td>"Torgersen"</td>
+<td>52</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>We can also group by multiple columns</p>
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">penguins.groupby([<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"island"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>]).count()</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (5, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">island</th>
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">count</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+<th>u32</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Torgersen"</td>
+<td>"Adelie"</td>
+<td>52</td>
+</tr>
+<tr class="even">
+<td>"Biscoe"</td>
+<td>"Gentoo"</td>
+<td>124</td>
+</tr>
+<tr class="odd">
+<td>"Dream"</td>
+<td>"Chinstrap"</td>
+<td>68</td>
+</tr>
+<tr class="even">
+<td>"Dream"</td>
+<td>"Adelie"</td>
+<td>56</td>
+</tr>
+<tr class="odd">
+<td>"Biscoe"</td>
+<td>"Adelie"</td>
+<td>44</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Another common thing might be to take the average of a numeric column by group. We can do this via the <code>agg()</code> method and passing various aggregation/summarization functions to this method.</p>
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">penguins.groupby(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>).agg(pl.mean(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bill_length_mm"</span>).alias(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bill_length_mean"</span>))</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (3, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">bill_length_mean</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>48.833824</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>38.791391</td>
+</tr>
+<tr class="odd">
+<td>"Gentoo"</td>
+<td>47.504878</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>We might also want to get the average of all of our numeric types by group. This is another situation where the <code>polars.selectors</code> module is helpful.</p>
+<div class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1">penguins.groupby(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>).agg(cs.by_dtype(pl.NUMERIC_DTYPES).mean().suffix(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"_mean"</span>))</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (3, 6)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">bill_length_mm_mean</th>
+<th data-quarto-table-cell-role="th">bill_depth_mm_mean</th>
+<th data-quarto-table-cell-role="th">flipper_length_mm_mean</th>
+<th data-quarto-table-cell-role="th">body_mass_g_mean</th>
+<th data-quarto-table-cell-role="th">year_mean</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>38.791391</td>
+<td>18.346358</td>
+<td>189.953642</td>
+<td>3700.662252</td>
+<td>2008.013158</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>48.833824</td>
+<td>18.420588</td>
+<td>195.823529</td>
+<td>3733.088235</td>
+<td>2007.970588</td>
+</tr>
+<tr class="odd">
+<td>"Gentoo"</td>
+<td>47.504878</td>
+<td>14.982114</td>
+<td>217.186992</td>
+<td>5076.01626</td>
+<td>2008.080645</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Or we might want to apply multiple aggregation functions to a column. This works basically like <code>with_columns()</code> in that you can pass multiple expressions</p>
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">penguins.groupby(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>).agg(</span>
+<span id="cb22-2">    pl.mean(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bill_length_mm"</span>).alias(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bill_length_mean"</span>),</span>
+<span id="cb22-3">    pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bill_length_mm"</span>).count().alias(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>),</span>
+<span id="cb22-4">)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (3, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">bill_length_mean</th>
+<th data-quarto-table-cell-role="th">n</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>f64</th>
+<th>u32</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>48.833824</td>
+<td>68</td>
+</tr>
+<tr class="even">
+<td>"Gentoo"</td>
+<td>47.504878</td>
+<td>124</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>38.791391</td>
+<td>152</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="reshaping-long-and-wide" class="level1">
+<h1>Reshaping Long and Wide</h1>
+<p>Let’s take our summary from before where we calculated the average of all of the numeric columns by species</p>
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1">species_means <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> penguins.groupby(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>).agg(cs.by_dtype(pl.NUMERIC_DTYPES).mean())</span></code></pre></div>
+</div>
+<p>Now suppose we want to pivot this longer so that it’s in “tidy” format. To do this, we want the <code>melt()</code> method.</p>
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1">species_long <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> species_means.melt(id_vars<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>)</span>
+<span id="cb24-2"></span>
+<span id="cb24-3">species_long.head()</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (5, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">variable</th>
+<th data-quarto-table-cell-role="th">value</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>"bill_length_mm…</td>
+<td>48.833824</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>"bill_length_mm…</td>
+<td>38.791391</td>
+</tr>
+<tr class="odd">
+<td>"Gentoo"</td>
+<td>"bill_length_mm…</td>
+<td>47.504878</td>
+</tr>
+<tr class="even">
+<td>"Chinstrap"</td>
+<td>"bill_depth_mm"</td>
+<td>18.420588</td>
+</tr>
+<tr class="odd">
+<td>"Adelie"</td>
+<td>"bill_depth_mm"</td>
+<td>18.346358</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Note that in the above, there’s also a <code>value_vars</code> parameter. By leaving it empty, it defaults to every column not in <code>id_vars</code>, but this might not always be the right choice.</p>
+<p>And if we want to reshape back to wide, we use <code>pivot()</code>. Pivot can optionally perform aggregations while reshaping, so we need to tell it that we don’t want it to aggregate anything (by passing <code>aggregate_function=None</code>)</p>
+<div class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"> species_long.pivot(values<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"value"</span>, index<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>, columns<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"variable"</span>, aggregate_function<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+}
+</style>
+<small>shape: (3, 6)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">species</th>
+<th data-quarto-table-cell-role="th">bill_length_mm</th>
+<th data-quarto-table-cell-role="th">bill_depth_mm</th>
+<th data-quarto-table-cell-role="th">flipper_length_mm</th>
+<th data-quarto-table-cell-role="th">body_mass_g</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Chinstrap"</td>
+<td>48.833824</td>
+<td>18.420588</td>
+<td>195.823529</td>
+<td>3733.088235</td>
+<td>2007.970588</td>
+</tr>
+<tr class="even">
+<td>"Adelie"</td>
+<td>38.791391</td>
+<td>18.346358</td>
+<td>189.953642</td>
+<td>3700.662252</td>
+<td>2008.013158</td>
+</tr>
+<tr class="odd">
+<td>"Gentoo"</td>
+<td>47.504878</td>
+<td>14.982114</td>
+<td>217.186992</td>
+<td>5076.01626</td>
+<td>2008.080645</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Python/polars_cheat_sheet.html</guid>
+  <pubDate>Wed, 22 May 2024 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Python Package Dev</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Python/py_pkg_dev.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This provides a bare-bones example of the workflow for creating and developing a python package. It is basically the workflow described in <a href="https://py-pkgs.org/03-how-to-package-a-python#">Beuzen &amp; Timbers’ Python Packages book</a> but with some tweaks/some of my notes.</p>
+<p>And here’s an <a href="https://github.com/ekholme/demo_py_pkg">example repo</a></p>
+<section id="step-0-install-tools" class="level1">
+<h1>Step 0: Install Tools</h1>
+<p>We need the <a href="https://python-poetry.org/">poetry</a> and <a href="https://github.com/cookiecutter/cookiecutter">cookiecutter</a> tools to help manage dependencies and set up package templates. We can install these with <a href="https://pipx.pypa.io/">pipx</a></p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> pipx install poetry</span>
+<span id="cb1-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> pipx install cookiecutter</span></code></pre></div>
+</section>
+<section id="step-1-create-pkg-structure-with-cookiecutter" class="level1">
+<h1>Step 1: Create pkg structure with cookiecutter</h1>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#use the python packages book cookiecutter template</span></span>
+<span id="cb2-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> cookiecutter https://github.com/py-pkgs/py-pkgs-cookiecutter.git</span></code></pre></div>
+<p>Also in this step we probably want to add version control and make a virtual env</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> git init</span>
+<span id="cb3-2"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#etc -- do a first commit, add a remote, etc.</span></span></code></pre></div>
+<p>To make a virtual env, I like to use VS Code to do this (via the command palette &gt; Python: Create Virtual Environment)</p>
+<p>then activate the venv by:</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> .venv/Scripts/activate</span></code></pre></div>
+</section>
+<section id="step-2-write-python-code-and-add-dependencies" class="level1">
+<h1>Step 2: Write python code and add dependencies</h1>
+<p>Now we can write whatever python code we want (within <code>/src</code>). Whenever we need to add a dependency, we can add it via the shell:</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> poetry add <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span>dependency_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span></span></code></pre></div>
+<p>We’ll want to make sure we’re doing this in our virtual environment.</p>
+</section>
+<section id="step-3-install-our-pkg-and-try-it-out" class="level1">
+<h1>Step 3: Install our pkg and try it out</h1>
+<p>We can install our in-development package with</p>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> poetry install</span></code></pre></div>
+<p>One useful note is that we can change code in the package and we don’t need to reinstall it – it’ll just work with the new code</p>
+</section>
+<section id="step-4-test-code" class="level1">
+<h1>Step 4: Test code</h1>
+<p>First, we write tests for our code inside <code>/tests</code>. Test files should be prefixed with <code>test_</code>.</p>
+<p>We want to add <code>pytest</code> (for testing) and <code>pytest-cov</code> (for test coverage) as dependencies. But our main package doesn’t actually depend on these things – only the testing does. Since they’re a development dependency, we can specify this in poetry via:</p>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> poetry add <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--group</span> dev pytest pytest-cov</span></code></pre></div>
+<p>and then to run our tests, we can do (in the shell):</p>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> pytest tests/ <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--cov</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=&lt;</span>pkg_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span></span></code></pre></div>
+<p>Where the <code>--cov</code> flag says we also want to see the test coverage.</p>
+</section>
+<section id="step-5-write-and-render-documentation" class="level1">
+<h1>Step 5: Write and render documentation</h1>
+<p>Some of the boilerplate documentation will be pre-generated via the cookiecutter package we used. We’ll definitely want to update the README, though, and possibly some other files.</p>
+<p>We’ll definitely want to include some docstrings within our functions – probably using the <a href="https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard">numpy docstring standard</a> (n.b.&nbsp;that DuetAI seems to be really good at generating these).</p>
+<p>We also might want to include a vignette showing a worked example of a common workflow in the package. We can create these as Jupyter notebooks within the <code>docs/</code> directory.</p>
+<p>Finally, we’ll want to render the documentation. Given our cookiecutter template, we can do this via the shell:</p>
+<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#add tools to render documentation</span></span>
+<span id="cb9-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> poetry add <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--group</span> dev myst-nb sphinx-autoapi sphinx-rtd-theme</span>
+<span id="cb9-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> cd docs</span>
+<span id="cb9-4"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> make html</span>
+<span id="cb9-5"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> cd ..</span></code></pre></div>
+<p>The <code>make html</code> command in the above is doing al of the heavy lifting.</p>
+<p>Then we can optionally host the documentation on Github Pages or <a href="https://about.readthedocs.com/?ref=readthedocs.org">Read the Docs</a></p>
+</section>
+<section id="step-6-tag-build-and-publish" class="level1">
+<h1>Step 6: Tag, build, and publish</h1>
+<p>These probably should be multiple steps, but whatever.</p>
+<p>When we make changes, we probably want to tag these as part of a release, via:</p>
+<div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> git tag</span></code></pre></div>
+<p>The Python Packages book has more info on tagging versions <a href="https://py-pkgs.org/03-how-to-package-a-python#tagging-a-package-release-with-version-control">here</a></p>
+<p>We can build distributions of our package via:</p>
+<div class="sourceCode" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">poetry</span> build</span></code></pre></div>
+<p>And if we want to publish our package to TestPyPI as a “dry run” before publishing to PyPI:</p>
+<div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> poetry config repositories.test-pypi <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb12-2">  https://test.pypi.org/legacy/</span>
+<span id="cb12-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> poetry publish <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-r</span> test-pypi</span>
+<span id="cb12-4"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> pip install <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--index-url</span> https://test.pypi.org/simple/ <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb12-5">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--extra-index-url</span> https://pypi.org/simple <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb12-6">  <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span>pkg_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span></span></code></pre></div>
+<p>And then if that works, we can publish to PyPI</p>
+<div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> poetry publish</span>
+<span id="cb13-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> pip install <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span>pkg_name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span></span></code></pre></div>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Python/py_pkg_dev.html</guid>
+  <pubDate>Wed, 06 Mar 2024 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Interact with Google’s Vertex AI Text Generation Models</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Python/vertex_ai_textgen.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This provides a minimal example of how to interact with Google’s Text-Bison model – a text generation model offered through GCP’s VertexAI suite of tools.</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#if aiplatform isn't installed, do that</span></span>
+<span id="cb1-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">pip</span> install <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--upgrade</span> google-cloud-aiplatform</span></code></pre></div>
+<p>This will show how to pass a prompt and some hyperparameters to the text generation model, then view a response passed back.</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> vertexai</span>
+<span id="cb2-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> vertexai.languagemodels <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> TextGenerationModel</span>
+<span id="cb2-3"></span>
+<span id="cb2-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#you might need to initiate a project</span></span>
+<span id="cb2-5">vertexai.init(project<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"my-project-id"</span>)</span>
+<span id="cb2-6"></span>
+<span id="cb2-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#instantiate a model</span></span>
+<span id="cb2-8">model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> TextGenerationModel.from_pretrained(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"text-bison@001"</span>)</span></code></pre></div>
+<p>In the above, <code>"text-bison@001"</code> is the model we’re passing our prompt to. This is an ok default, but we might want to see the <a href="https://cloud.google.com/vertex-ai/docs/generative-ai/learn/models">list of available models</a> to choose a different one. This is especiall true if we need to pass a large piece of text to a model.</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#p is our prompt</span></span>
+<span id="cb3-2">p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Generate 10 interview questions that would be suitable to ask a candidate for an educational researcher position"</span></span>
+<span id="cb3-3"></span>
+<span id="cb3-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#obviously we can tweak these as needed</span></span>
+<span id="cb3-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#but these feel like decent defaults</span></span>
+<span id="cb3-6">params <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {</span>
+<span id="cb3-7">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"temperature"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.2</span>,</span>
+<span id="cb3-8">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"top_p"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.9</span>,</span>
+<span id="cb3-9">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"top_k"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">40</span>,</span>
+<span id="cb3-10">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"max_output_tokens"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1024</span></span>
+<span id="cb3-11">}</span>
+<span id="cb3-12"></span>
+<span id="cb3-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#hit the model and get a response</span></span>
+<span id="cb3-14">resp <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model.predict(p, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span>params)</span>
+<span id="cb3-15"></span>
+<span id="cb3-16"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#view the text from the response</span></span>
+<span id="cb3-17"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(resp.text)</span></code></pre></div>
+
+
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Python/vertex_ai_textgen.html</guid>
+  <pubDate>Thu, 07 Dec 2023 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Basics - Classes</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Python/basics_classes.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>The stuff below is like Python classes 101. It’s mostly either directly copied from or else loosely inspired by the <a href="https://docs.python.org/3/tutorial/classes.html">Python manual</a></p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># define a new class</span></span>
+<span id="cb1-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> MyClass:</span>
+<span id="cb1-3">    x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">123</span></span>
+<span id="cb1-4"></span>
+<span id="cb1-5">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> greet(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb1-6">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Hello from MyClass"</span></span>
+<span id="cb1-7"></span>
+<span id="cb1-8"></span>
+<span id="cb1-9">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> MyClass()</span>
+<span id="cb1-10"></span>
+<span id="cb1-11"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># see class attributes</span></span>
+<span id="cb1-12">x.greet()</span>
+<span id="cb1-13">x.x</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>123</code></pre>
+</div>
+</div>
+<section id="init-method" class="level2">
+<h2 class="anchored" data-anchor-id="init-method">Init Method</h2>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># we can define an __init()__ method to help us create object instances with specific initial states</span></span>
+<span id="cb3-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> MyClass:</span>
+<span id="cb3-3">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x):</span>
+<span id="cb3-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x</span>
+<span id="cb3-5"></span>
+<span id="cb3-6">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> greet(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb3-7">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Hello from MyClass"</span></span>
+<span id="cb3-8"></span>
+<span id="cb3-9"></span>
+<span id="cb3-10">y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> MyClass(x<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb3-11">y.x</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>1</code></pre>
+</div>
+</div>
+</section>
+<section id="class-variables-and-instance-variables" class="level2">
+<h2 class="anchored" data-anchor-id="class-variables-and-instance-variables">Class Variables and Instance Variables</h2>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># class variables will be shared by all instances, whereas instance variables will be unique to each instance</span></span>
+<span id="cb5-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Dog:</span>
+<span id="cb5-3">    kind <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"canine"</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># class variable</span></span>
+<span id="cb5-4"></span>
+<span id="cb5-5">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, name):</span>
+<span id="cb5-6">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.name <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> name</span>
+<span id="cb5-7"></span>
+<span id="cb5-8"></span>
+<span id="cb5-9">d <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Dog(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Nala"</span>)</span>
+<span id="cb5-10">e <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Dog(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Adi"</span>)</span>
+<span id="cb5-11"></span>
+<span id="cb5-12">d.name</span>
+<span id="cb5-13">d.kind</span>
+<span id="cb5-14">e.name</span>
+<span id="cb5-15"></span>
+<span id="cb5-16"></span>
+<span id="cb5-17"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># below might be a way to create a Dog class where each dog has its own set of tricks</span></span>
+<span id="cb5-18"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Dog:</span>
+<span id="cb5-19">    kind <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"canine"</span></span>
+<span id="cb5-20"></span>
+<span id="cb5-21">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, name):</span>
+<span id="cb5-22">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.name <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> name</span>
+<span id="cb5-23">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.tricks <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> []</span>
+<span id="cb5-24"></span>
+<span id="cb5-25">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> add_trick(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, trick):</span>
+<span id="cb5-26">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.tricks.append(trick)</span>
+<span id="cb5-27"></span>
+<span id="cb5-28"></span>
+<span id="cb5-29">d <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Dog(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Nala"</span>)</span>
+<span id="cb5-30">d.add_trick(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"roll over"</span>)</span>
+<span id="cb5-31">d.add_trick(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sit"</span>)</span>
+<span id="cb5-32"></span>
+<span id="cb5-33">d.tricks</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>['roll over', 'sit']</code></pre>
+</div>
+</div>
+</section>
+<section id="class-inheritance" class="level2">
+<h2 class="anchored" data-anchor-id="class-inheritance">Class Inheritance</h2>
+<p>Class inheritance lets classes inherit variables and methods from other classes</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># classes also support inheritance</span></span>
+<span id="cb7-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Animal:</span>
+<span id="cb7-3">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, name):</span>
+<span id="cb7-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.name <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> name</span>
+<span id="cb7-5"></span>
+<span id="cb7-6"></span>
+<span id="cb7-7"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Cat(Animal):</span>
+<span id="cb7-8">    kind <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cat"</span></span>
+<span id="cb7-9"></span>
+<span id="cb7-10"></span>
+<span id="cb7-11">a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Cat(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Fluffy"</span>)</span>
+<span id="cb7-12"></span>
+<span id="cb7-13">a.name</span>
+<span id="cb7-14">a.kind</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>'cat'</code></pre>
+</div>
+</div>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Python/basics_classes.html</guid>
+  <pubDate>Fri, 11 Aug 2023 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Scikit-Learn Pipeline</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Python/sklearn_pipeline.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Below is a minimal (yet complete) example of a machine learning pipeline using python and <a href="https://scikit-learn.org/stable/">scikit-learn</a> and the <a href="https://allisonhorst.github.io/palmerpenguins/">Palmer Penguins dataset</a>.</p>
+<p>Note that the goal here isn’t necessarily to fit the best model; rather it’s just to demonstrate an sklearn pipeline. Also note that I wouldn’t call myself an expert python programmer, so there may be better/more efficient ways to do this.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> pl</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> math</span>
+<span id="cb1-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.model_selection <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> train_test_split</span>
+<span id="cb1-5"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.pipeline <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Pipeline</span>
+<span id="cb1-6"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.preprocessing <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> StandardScaler, OneHotEncoder</span>
+<span id="cb1-7"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.impute <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> SimpleImputer</span>
+<span id="cb1-8"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.linear_model <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> LinearRegression</span>
+<span id="cb1-9"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.compose <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> ColumnTransformer</span>
+<span id="cb1-10"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.metrics <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> mean_squared_error</span>
+<span id="cb1-11"></span>
+<span id="cb1-12">penguins <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pl.read_csv(</span>
+<span id="cb1-13">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv"</span>,</span>
+<span id="cb1-14">    null_values<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"NA"</span>,</span>
+<span id="cb1-15">)</span>
+<span id="cb1-16"></span>
+<span id="cb1-17"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># filtering to only rows with available body mass data</span></span>
+<span id="cb1-18">penguins_complete <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> penguins.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">filter</span>(pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"body_mass_g"</span>).is_not_null())</span>
+<span id="cb1-19"></span>
+<span id="cb1-20"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># coercing null to nan</span></span>
+<span id="cb1-21">penguins_complete <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> penguins_complete.with_columns(pl.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">all</span>().fill_null(np.nan))</span>
+<span id="cb1-22"></span>
+<span id="cb1-23"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># separate into X and y</span></span>
+<span id="cb1-24">y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> penguins_complete[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"body_mass_g"</span>]</span>
+<span id="cb1-25">X <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> penguins_complete.select(pl.exclude(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"body_mass_g"</span>))</span>
+<span id="cb1-26"></span>
+<span id="cb1-27"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># coerce X to pandas since polars dfs don't seem to be supported for all of the sklearn steps yet</span></span>
+<span id="cb1-28">X <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> X.to_pandas()</span>
+<span id="cb1-29"></span>
+<span id="cb1-30"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># train test split</span></span>
+<span id="cb1-31">X_trn, X_tst, y_trn, y_tst <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> train_test_split(X, y, random_state<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">408</span>)</span>
+<span id="cb1-32"></span>
+<span id="cb1-33"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># create pipeline for categorical features</span></span>
+<span id="cb1-34">cat_feats <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"species"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"island"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sex"</span>]</span>
+<span id="cb1-35">cat_transform <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Pipeline(</span>
+<span id="cb1-36">    [</span>
+<span id="cb1-37">        (<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cat_imputer"</span>, SimpleImputer(strategy<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"most_frequent"</span>)),</span>
+<span id="cb1-38">        (<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"oh_encoder"</span>, OneHotEncoder(drop<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"first"</span>)),</span>
+<span id="cb1-39">    ]</span>
+<span id="cb1-40">)</span>
+<span id="cb1-41"></span>
+<span id="cb1-42"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># create pipeline for numerical features</span></span>
+<span id="cb1-43">cont_feats <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bill_length_mm"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bill_depth_mm"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"flipper_length_mm"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"year"</span>]</span>
+<span id="cb1-44">cont_transform <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Pipeline(</span>
+<span id="cb1-45">    [</span>
+<span id="cb1-46">        (<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cont_imputer"</span>, SimpleImputer(strategy<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"mean"</span>)),</span>
+<span id="cb1-47">        (<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"standardizer"</span>, StandardScaler()),</span>
+<span id="cb1-48">    ]</span>
+<span id="cb1-49">)</span>
+<span id="cb1-50"></span>
+<span id="cb1-51"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># create a preprocessing pipeline</span></span>
+<span id="cb1-52">preprocessor <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ColumnTransformer(</span>
+<span id="cb1-53">    [(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cats"</span>, cat_transform, cat_feats), (<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"conts"</span>, cont_transform, cont_feats)]</span>
+<span id="cb1-54">)</span>
+<span id="cb1-55"></span>
+<span id="cb1-56"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># make full pipeline</span></span>
+<span id="cb1-57">pipe <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Pipeline([(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"preprocess"</span>, preprocessor), (<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lin_reg"</span>, LinearRegression())])</span>
+<span id="cb1-58"></span>
+<span id="cb1-59"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># fit pipeline</span></span>
+<span id="cb1-60">pipe.fit(X_trn, y_trn)</span>
+<span id="cb1-61"></span>
+<span id="cb1-62"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># predict training y's</span></span>
+<span id="cb1-63">y_hat <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pipe.predict(X_trn)</span>
+<span id="cb1-64"></span>
+<span id="cb1-65"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># evaluate model</span></span>
+<span id="cb1-66">y_hat_tst <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pipe.predict(X_tst)</span>
+<span id="cb1-67"></span>
+<span id="cb1-68">math.sqrt(mean_squared_error(y_tst, y_hat_tst))</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>295.1333053249438</code></pre>
+</div>
+</div>
+
+
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Python/sklearn_pipeline.html</guid>
+  <pubDate>Tue, 11 Jul 2023 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>venvs in Python</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Python/venv.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>To create a venv:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">python3.11</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-m</span> venv ./venv</span></code></pre></div>
+<p>and to activate it:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">source</span> venv/bin/activate</span></code></pre></div>
+<p>et voila</p>
+
+
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Python/venv.html</guid>
+  <pubDate>Fri, 14 Apr 2023 04:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>

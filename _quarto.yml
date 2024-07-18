@@ -4,6 +4,7 @@ project:
 
 website:
   title: "leakybrain"
+  site-url: "https://leakybrain.ericekholm.com"
   sidebar:
     contents:
       - databases.qmd

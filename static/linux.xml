@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>leakybrain</title>
+<link>https://leakybrain.ericekholm.com/linux.html</link>
+<atom:link href="https://leakybrain.ericekholm.com/linux.xml" rel="self" type="application/rss+xml"/>
+<description></description>
+<generator>quarto-1.5.54</generator>
+<lastBuildDate>Tue, 05 Mar 2024 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Install Software in Linux</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Linux/install_programs.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This is a generic guide for how to download and install something in Linux.</p>
+<section id="using-apt" class="level1">
+<h1>Using apt</h1>
+<p>The easiest way to install something is to use the <code>apt</code> package manager. The general workflow here is to do the following:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> apt update <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">&amp;&amp;</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> apt upgrade</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> apt install package_name</span></code></pre></div>
+<p>The problem with this approach is that <code>apt</code> goesn’t always have the latest version of a piece of software.</p>
+</section>
+<section id="install-manually" class="level1">
+<h1>Install manually</h1>
+<p>To install something manually through the shell, we use a combination of <code>wget</code>, <code>tar</code> and <code>mv</code>. These do the following:</p>
+<ul>
+<li><code>wget</code> downloads files;</li>
+<li><code>tar</code> provides utilities to work with tarballs</li>
+<li><code>mv</code> moves (and also renames) files</li>
+</ul>
+<p>So imagine we want to install Go 1.22 (the current version at the time of writing). We could do the following:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">VERSION</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>1.22.0</span>
+<span id="cb2-2"><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">OS</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>linux</span>
+<span id="cb2-3"><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">ARCH</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>amd64</span>
+<span id="cb2-4"></span>
+<span id="cb2-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">cd</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$HOME</span></span>
+<span id="cb2-6"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">wget</span> https://storage.googleapis.com/golang/go<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$VERSION</span>.<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$OS</span>-<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$ARCH</span>.tar.gz</span>
+<span id="cb2-7"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tar</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-xvf</span> go<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$VERSION</span>.<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$OS</span>-<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$ARCH</span>.tar.gz</span>
+<span id="cb2-8"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> mv go /usr/local</span></code></pre></div>
+<p>This does the following:</p>
+<ul>
+<li>The first few lines set variables that we’ll use later.</li>
+<li>Change our current directory (<code>cd</code>) to whatever our home directory is</li>
+<li>Downloads the tarball with Go 1.22 from the internet.</li>
+<li>extracts (<code>x</code>) in verbose mode (<code>v</code>) the specified file (<code>f go$VERSION.$OS-$ARCH.tar.gz</code>)</li>
+<li>moves (<code>mv</code>) the extracted file to the <code>/usr/local</code> directory</li>
+</ul>
+<p>We probably then want to ensure that this is in our path, which we can do by fiddling with our <code>~/.bashrc</code> or <code>~/.zshrc</code> file (or whatever file is relevant for the shell you use). We want to look for (or add) something like this:</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#some other stuff in your ~/.zshrc file</span></span>
+<span id="cb3-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">export</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">GOROOT</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>/usr/local/go </span>
+<span id="cb3-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">export</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">PATH</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$PATH</span>:<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$GOROOT</span>/bin</span></code></pre></div>
+<p>et voila, you now have go installed. And this logic applies to any other software, too.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Linux/install_programs.html</guid>
+  <pubDate>Tue, 05 Mar 2024 05:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>leakybrain</title>
+<link>https://leakybrain.ericekholm.com/databases.html</link>
+<atom:link href="https://leakybrain.ericekholm.com/databases.xml" rel="self" type="application/rss+xml"/>
+<description></description>
+<generator>quarto-1.5.54</generator>
+<lastBuildDate>Tue, 09 Jul 2024 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>SQLite</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Databases/sqlite.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><em>Disclaimer: if you’re reading this, I’m not a database expert. These are kinda notes to myself (and potentially others who stumble upon them), and they’re intended to organize my thoughts. Make of them what you will</em></p>
+<section id="what-is-sqlite" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-sqlite">What is SQLite?</h2>
+<p><a href="https://www.sqlite.org/index.html">SQLite</a> is basically a small, self-contained database that can be embedded in other applications. It’s useful for applications or devices that don’t need or want to connect to an external database like Postgres or some cloud offering.</p>
+<p>SQLite is nice for lots of reasons – it’s easy to install (see below), it’s typically just something you link into your application via a library, it’s minimalistic but also feature-rich (e.g.&nbsp;it has CTEs, full-text search, JSON compatibility). It reminds me of DuckDB is a lot of ways, but DuckDB is more intended for analytic, column-oriented workflows whereas SQLite is more intended for row-oriented operations.</p>
+<p>That said, one of SQLite’s strengths (that it’s bundled with the server) is also one of its weaknesses. That is, if the application server explodes, so does the database. Pre-iCloud phones are a useful analogy. Before there were cloud backups for your phone, if you fell into a pool, all of your data on the phone was probably lost. So I guess don’t throw your SQLite-powered application server into a pool…</p>
+</section>
+<section id="installing-sqlite" class="level2">
+<h2 class="anchored" data-anchor-id="installing-sqlite">Installing SQLite</h2>
+<p>The easiest way to install sqlite – and the way you’ll do it on the vast vast majority of systems – is via <code>apt</code>:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#sudo apt update &amp;&amp; sudo apt upgrade</span></span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> apt install sqlite</span></code></pre></div>
+<p>Then verify the installation via:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">sqlite3</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--version</span></span></code></pre></div>
+</section>
+<section id="creating-a-database" class="level2">
+<h2 class="anchored" data-anchor-id="creating-a-database">Creating a Database</h2>
+<p>There are a few ways to create a database. The most straightforward is as follows:</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">sqlite3</span> demo.db</span></code></pre></div>
+<p>This will open <code>demo.db</code> if it exists or create it if it doesn’t.</p>
+<p>But you can also open the <code>sqlite</code> application from the shell, then create a database from there:</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">sqlite3</span></span>
+<span id="cb4-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">.open</span> demo.db</span></code></pre></div>
+<p>*Note that just running the <code>sqlite3</code> command without any arguments will connect to an in-memory database. So we’re first opening an in-memory database, then saying “actually I want to connect to demo.db instead”</p>
+<p>Another way is to use a language with an SQLite3 library to do that, e.g.&nbsp;Python:</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> sqlite3</span>
+<span id="cb5-2"></span>
+<span id="cb5-3">con <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> sqlite3.<span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">connect</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'demo.db'</span>)</span></code></pre></div>
+</section>
+<section id="create-and-manage-tables" class="level2">
+<h2 class="anchored" data-anchor-id="create-and-manage-tables">Create and Manage Tables</h2>
+<p>You create tables just like you would with any other SQL database (e.g.&nbsp;Postgres). That is, it uses the same SQL statements. So to create a table, we could run</p>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">sqlite3</span></span></code></pre></div>
+<p>then run the following code in the terminal:</p>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">CREATE</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">TABLE</span> users (</span>
+<span id="cb7-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">id</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">INTEGER</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">PRIMARY</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">KEY</span> AUTOINCREMENT</span>
+<span id="cb7-3">    username TEXT <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">UNIQUE</span>,</span>
+<span id="cb7-4">    email TEXT <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">UNIQUE</span></span>
+<span id="cb7-5">);</span></code></pre></div>
+<p>A better approach, though, is to save the above to a <code>.sql</code> file, then run this file from the shell, so you don’t have to type a long SQL statement into the terminal. If that statement is saved in <code>my_file.sql</code>, then we could run:</p>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">sqlite3</span> demo.db <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> path/to/my_file.sql</span></code></pre></div>
+<section id="check-existing-tables" class="level3">
+<h3 class="anchored" data-anchor-id="check-existing-tables">Check Existing Tables</h3>
+<p>To see what tables exist in an sqlite database, run:</p>
+<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">sqlite3</span> demo.db</span>
+<span id="cb9-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">.tables</span></span></code></pre></div>
+</section>
+<section id="check-the-schema-of-a-table" class="level3">
+<h3 class="anchored" data-anchor-id="check-the-schema-of-a-table">Check the Schema of a Table</h3>
+<p>To see the schema of a table:</p>
+<div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">sqlite3</span> demo.db</span>
+<span id="cb10-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">.schema</span> tablename</span></code></pre></div>
+</section>
+</section>
+<section id="other-readings" class="level2">
+<h2 class="anchored" data-anchor-id="other-readings">Other Readings</h2>
+<ul>
+<li><a href="https://fly.io/blog/all-in-on-sqlite-litestream/">Ben Johnson’s “Im All-In on Server-Side SQLite”</a></li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Databases/sqlite.html</guid>
+  <pubDate>Tue, 09 Jul 2024 04:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>
