@@ -163,6 +163,16 @@
     "text": "Check Projects\nTo list all of your projects:\ngcloud projects list\nTo check which project is your default project:\ngcloud config get-value project\nTo set which project is your default project:\ngcloud config set project [PROJECT_ID]\n\n\nCloud Storage\nTo push data to a cloud storage bucket:\ngcloud storage cp PATH/TO/LOCAL/FILE.PARQUET gs://BUCKET_NAME\nNote that cp in the above command means “copy.” See other flags/options here\n\n\nApp Engine\nTo deploy an app to App Engine:\ngcloud app deploy"
   },
   {
+    "objectID": "deep_learning.html",
+    "href": "deep_learning.html",
+    "title": "Deep Learning",
+    "section": "",
+    "text": "Order By\n       Default\n         \n          Date - Oldest\n        \n         \n          Date - Newest\n        \n         \n          Title\n        \n         \n          Author\n        \n     \n  \n    \n      \n      \n    \n\n\n\n\n\nDate\n\n\nTitle\n\n\nAuthor\n\n\n\n\n\n\nAug 14, 2024\n\n\nDeep Learning Overview\n\n\nEric Ekholm\n\n\n\n\n\nNo matching items",
+    "crumbs": [
+      "Deep Learning"
+    ]
+  },
+  {
     "objectID": "databases.html",
     "href": "databases.html",
     "title": "Databases",
@@ -220,6 +230,34 @@
     "title": "SQLite",
     "section": "Other Readings",
     "text": "Other Readings\n\nBen Johnson’s “Im All-In on Server-Side SQLite”"
+  },
+  {
+    "objectID": "Deep_Learning/overview.html",
+    "href": "Deep_Learning/overview.html",
+    "title": "Deep Learning Overview",
+    "section": "",
+    "text": "Deep learning is a sub-domain of machine learning focused on creating deep neural networks. The image below is a Venn Diagram showing the overlap between AI, ML, and deep learning that I suppose I more or less agree with.\n\nLike other ML models/subdisciplines, deep learning focuses on models flexibly learning from data. Sure, the modeler specifies the model architecture, and different architectures are more suited for different tasks, but there are fewer assumptions “built into” neural networks than there are in, say, linear regressions. This makes them flexible enough to learn from data, but it also makes them prone to under- or over-fitting if there isn’t enough data to learn from.\nEven though deep learning models are, I think, technically parametric models (in that they have a fixed number of parameters once the model is specified), I tend to think of them as more akin to (nonparametric) random forest or boosted tree models, maybe because they’re big? But that’s not actually correct, I suppose.\nWhat we mean by “deep” neural networks is that the input data passes through multiple layers in a network. In each layer, the input is progressively refined (via matrix multiplication and some activation function) before being passed to the next layer. This concept is both very flexible and very powerful. Deep neural networks have proven to be useful in computer vision, natural language processing, auditory processing, and more.\nI’ll have examples and other more specific use cases related to deep learning throughout this section of the website."
+  },
+  {
+    "objectID": "Deep_Learning/overview.html#what-is-deep-learning",
+    "href": "Deep_Learning/overview.html#what-is-deep-learning",
+    "title": "Deep Learning Overview",
+    "section": "",
+    "text": "Deep learning is a sub-domain of machine learning focused on creating deep neural networks. The image below is a Venn Diagram showing the overlap between AI, ML, and deep learning that I suppose I more or less agree with.\n\nLike other ML models/subdisciplines, deep learning focuses on models flexibly learning from data. Sure, the modeler specifies the model architecture, and different architectures are more suited for different tasks, but there are fewer assumptions “built into” neural networks than there are in, say, linear regressions. This makes them flexible enough to learn from data, but it also makes them prone to under- or over-fitting if there isn’t enough data to learn from.\nEven though deep learning models are, I think, technically parametric models (in that they have a fixed number of parameters once the model is specified), I tend to think of them as more akin to (nonparametric) random forest or boosted tree models, maybe because they’re big? But that’s not actually correct, I suppose.\nWhat we mean by “deep” neural networks is that the input data passes through multiple layers in a network. In each layer, the input is progressively refined (via matrix multiplication and some activation function) before being passed to the next layer. This concept is both very flexible and very powerful. Deep neural networks have proven to be useful in computer vision, natural language processing, auditory processing, and more.\nI’ll have examples and other more specific use cases related to deep learning throughout this section of the website."
+  },
+  {
+    "objectID": "Deep_Learning/overview.html#a-basic-fully-connected-neural-net",
+    "href": "Deep_Learning/overview.html#a-basic-fully-connected-neural-net",
+    "title": "Deep Learning Overview",
+    "section": "A Basic Fully-Connected Neural Net",
+    "text": "A Basic Fully-Connected Neural Net\nHere’s a diagram of a fully-connected neural network. Each layer is “densely” connected to the subsequent layer (i.e. all nodes in layer i are connected to all nodes in layer i+1). In this model, nodes are inputs/outputs, and the lines represent some function that transforms a node into the subsequent node (usually matrix multiplication plus some activation function).\n\nThe number of nodes in each layer is flexible and is up to the modeler to determine, as is the total number of layers. According to Jeremy Howard’s fastai book (see the “Going Deeper” section), it’s typically more computationally efficient to use more smaller layers than fewer large layers, and this approach can also get us better performance. The last layer should have j nodes, where j is the number of outputs. In a regression problem, this will be 1. In a classification problem, it can be the number of classes, k, of the outcome variable. Or it can be, equivalently, k-1, assuming membership in only 1 class."
+  },
+  {
+    "objectID": "Deep_Learning/overview.html#deep-learning-frameworks",
+    "href": "Deep_Learning/overview.html#deep-learning-frameworks",
+    "title": "Deep Learning Overview",
+    "section": "Deep Learning Frameworks",
+    "text": "Deep Learning Frameworks\nMost deep learning projects are going to happen in Python.I’m going to preface this by saying I’m not a deep learning expert, but my understanding is that PyTorch is probably the most popular deep learning framework in 2024. It’s the only framework I’ve used in Python, but it feels pretty straightforward to work with. Plus there are tons of examples online.\nfastai is a higher-level framework that simplifies/abstracts away some of the lower-level stuff in PyTorch. It makes it very easy to quickly train (or fine-tune) models to solve a variety of problems. I like it a lot, and it feels almost like cheating to use it…\nI’ve never used Tensorflow, but I think it’s also still fairly popular (although less so than PyTorch?).\nIn terms of non-Python frameworks, I like Julia’s Flux framework. It feels easy to use and, since it’s written in pure Julia, it’s easy to extend and it integrates well with other Julia code. I haven’t used it extensively, but I’ve enjoyed my limited experience with it. It’s kind of a hipster framework, so there are fewer worked examples online.\nI’ve also dabbled in R’s torch ecosystem. I tend to use R more than Python or Julia in my day-to-day work, but R-torch is probably my least-favorite of the deep learning frameworks I’ve used. The API feels like it’s trying to mimic Python syntax, which feels awkward in R (if I wanted Python, I’d just use Python). Again, I don’t have extensive experience with torch, so maybe I’m missing something."
   },
   {
     "objectID": "GCP/ci_cd_cloudrun.html",

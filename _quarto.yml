@@ -8,6 +8,7 @@ website:
   sidebar:
     contents:
       - databases.qmd
+      - deep_learning.qmd
       - gcp.qmd
       - go.qmd
       - julia.qmd

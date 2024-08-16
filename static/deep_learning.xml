@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>leakybrain</title>
+<link>https://leakybrain.ericekholm.com/deep_learning.html</link>
+<atom:link href="https://leakybrain.ericekholm.com/deep_learning.xml" rel="self" type="application/rss+xml"/>
+<description></description>
+<generator>quarto-1.5.54</generator>
+<lastBuildDate>Wed, 14 Aug 2024 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Deep Learning Overview</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Deep_Learning/overview.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="what-is-deep-learning" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-deep-learning">What is Deep Learning</h2>
+<p>Deep learning is a sub-domain of machine learning focused on creating deep neural networks. The image below is a Venn Diagram showing the overlap between AI, ML, and deep learning that I suppose I more or less agree with.</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:1400/1*_YTGLYXXn5JPTPz_Ew4HIw.png" class="img-fluid"></p>
+<p>Like other ML models/subdisciplines, deep learning focuses on models flexibly learning from data. Sure, the modeler specifies the model architecture, and different architectures are more suited for different tasks, but there are fewer assumptions “built into” neural networks than there are in, say, linear regressions. This makes them flexible enough to learn from data, but it also makes them prone to under- or over-fitting if there isn’t enough data to learn from.</p>
+<p>Even though deep learning models are, I think, technically parametric models (in that they have a fixed number of parameters once the model is specified), I tend to think of them as more akin to (nonparametric) random forest or boosted tree models, maybe because they’re big? But that’s not actually correct, I suppose.</p>
+<p>What we mean by “deep” neural networks is that the input data passes through multiple layers in a network. In each layer, the input is progressively refined (via matrix multiplication and some activation function) before being passed to the next layer. This concept is both very flexible and very powerful. Deep neural networks have proven to be useful in computer vision, natural language processing, auditory processing, and more.</p>
+<p>I’ll have examples and other more specific use cases related to deep learning throughout this section of the website.</p>
+</section>
+<section id="a-basic-fully-connected-neural-net" class="level2">
+<h2 class="anchored" data-anchor-id="a-basic-fully-connected-neural-net">A Basic Fully-Connected Neural Net</h2>
+<p>Here’s a diagram of a fully-connected neural network. Each layer is “densely” connected to the subsequent layer (i.e.&nbsp;all nodes in layer <em>i</em> are connected to all nodes in layer <em>i+1</em>). In this model, nodes are inputs/outputs, and the lines represent some function that transforms a node into the subsequent node (usually matrix multiplication plus some activation function).</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:720/1*VHOUViL8dHGfvxCsswPv-Q.png" class="img-fluid"></p>
+<p>The number of nodes in each layer is flexible and is up to the modeler to determine, as is the total number of layers. According to Jeremy Howard’s <a href="https://github.com/fastai/fastbook/blob/master/04_mnist_basics.ipynb">fastai book (see the “Going Deeper” section)</a>, it’s typically more computationally efficient to use more smaller layers than fewer large layers, and this approach can also get us better performance. The last layer should have <em>j</em> nodes, where <em>j</em> is the number of outputs. In a regression problem, this will be 1. In a classification problem, it can be the number of classes, <em>k</em>, of the outcome variable. Or it can be, equivalently, <em>k-1</em>, assuming membership in only 1 class.</p>
+</section>
+<section id="deep-learning-frameworks" class="level2">
+<h2 class="anchored" data-anchor-id="deep-learning-frameworks">Deep Learning Frameworks</h2>
+<p>Most deep learning projects are going to happen in Python.I’m going to preface this by saying I’m not a deep learning expert, but my understanding is that <a href="https://pytorch.org">PyTorch</a> is probably the most popular deep learning framework in 2024. It’s the only framework I’ve used in Python, but it feels pretty straightforward to work with. Plus there are tons of examples online.</p>
+<p><a href="https://docs.fast.ai/">fastai</a> is a higher-level framework that simplifies/abstracts away some of the lower-level stuff in PyTorch. It makes it very easy to quickly train (or fine-tune) models to solve a variety of problems. I like it a lot, and it feels almost like cheating to use it…</p>
+<p>I’ve never used <a href="https://www.tensorflow.org/">Tensorflow</a>, but I think it’s also still fairly popular (although less so than PyTorch?).</p>
+<p>In terms of non-Python frameworks, I like Julia’s <a href="https://fluxml.ai/">Flux</a> framework. It feels easy to use and, since it’s written in pure Julia, it’s easy to extend and it integrates well with other Julia code. I haven’t used it extensively, but I’ve enjoyed my limited experience with it. It’s kind of a hipster framework, so there are fewer worked examples online.</p>
+<p>I’ve also dabbled in R’s <a href="https://torch.mlverse.org/">torch</a> ecosystem. I tend to use R more than Python or Julia in my day-to-day work, but R-torch is probably my least-favorite of the deep learning frameworks I’ve used. The API feels like it’s trying to mimic Python syntax, which feels awkward in R (if I wanted Python, I’d just use Python). Again, I don’t have extensive experience with torch, so maybe I’m missing something.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Deep_Learning/overview.html</guid>
+  <pubDate>Wed, 14 Aug 2024 04:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>

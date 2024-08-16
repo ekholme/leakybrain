@@ -26,6 +26,12 @@
     ]
   },
   {
+    "listing": "/deep_learning.html",
+    "items": [
+      "/Deep_Learning/overview.html"
+    ]
+  },
+  {
     "listing": "/databases.html",
     "items": [
       "/Databases/sqlite.html"
