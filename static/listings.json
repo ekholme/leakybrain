@@ -28,6 +28,7 @@
   {
     "listing": "/deep_learning.html",
     "items": [
+      "/Deep_Learning/pytorch_fully_connected.html",
       "/Deep_Learning/overview.html"
     ]
   },

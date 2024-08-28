@@ -77,7 +77,11 @@
     <lastmod>2024-08-13T19:52:27.542Z</lastmod>
   </url>
   <url>
-    <loc>https://leakybrain.ericekholm.com/databases.html</loc>
+    <loc>https://leakybrain.ericekholm.com/Deep_Learning/overview.html</loc>
+    <lastmod>2024-08-16T19:26:51.229Z</lastmod>
+  </url>
+  <url>
+    <loc>https://leakybrain.ericekholm.com/Databases/sqlite.html</loc>
     <lastmod>2024-07-17T18:51:48.968Z</lastmod>
   </url>
   <url>
@@ -85,12 +89,12 @@
     <lastmod>2024-05-22T15:57:55.069Z</lastmod>
   </url>
   <url>
-    <loc>https://leakybrain.ericekholm.com/Databases/sqlite.html</loc>
+    <loc>https://leakybrain.ericekholm.com/databases.html</loc>
     <lastmod>2024-07-17T18:51:48.968Z</lastmod>
   </url>
   <url>
-    <loc>https://leakybrain.ericekholm.com/Deep_Learning/overview.html</loc>
-    <lastmod>2024-08-16T19:26:51.229Z</lastmod>
+    <loc>https://leakybrain.ericekholm.com/Deep_Learning/pytorch_fully_connected.html</loc>
+    <lastmod>2024-08-28T20:07:00.471Z</lastmod>
   </url>
   <url>
     <loc>https://leakybrain.ericekholm.com/GCP/ci_cd_cloudrun.html</loc>

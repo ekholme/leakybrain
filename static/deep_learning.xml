@@ -10,7 +10,696 @@
 <atom:link href="https://leakybrain.ericekholm.com/deep_learning.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.5.54</generator>
-<lastBuildDate>Wed, 14 Aug 2024 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Fri, 16 Aug 2024 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Fully Connected Network in PyTorch</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/Deep_Learning/pytorch_fully_connected.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This page contains my notes on how to implement a fully-connected neural network (FCN) in PyTorch. It’s meant to be a bare-bones, basic implementation of an FCN.</p>
+<section id="what-is-an-fcn" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-an-fcn">What is an FCN?</h2>
+<p>A fully connected network (FCN) is an architecture with a bunch of densely-connected layers stacked on top of one another. In this architecture, each node in layer <em>i</em> is connected to each node of layer <em>i+1</em>, etc, with the output of each layer being passed through an activation function before being sent to the next layer. Here’s what this looks like:</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:720/1*VHOUViL8dHGfvxCsswPv-Q.png" class="img-fluid"></p>
+<p>In PyTorch parlance, these are linear layers, and they can be specified via <code>nn.Linear(in_size, out_size)</code>. Other frameworks might call them other things (e.g.&nbsp;Flux.jl calls them <a href="https://fluxml.ai/Flux.jl/previews/PR1613/models/layers/">Dense layers</a>).</p>
+<section id="strengths-and-weaknesses" class="level3">
+<h3 class="anchored" data-anchor-id="strengths-and-weaknesses">Strengths and Weaknesses</h3>
+<p>FCNs are flexible models that can do well at all sorts of “typical” machine-learning tasks (i.e.&nbsp;classification and regression), and can work with various types of inputs (images, text, etc.). They’re basically the linear regression of the deep learning world (in that they’re foundational models, not in the sense that they’re linear…because they aren’t).</p>
+<p>Since FCNs connect all nodes in layer <em>i</em> to all nodes in layer <em>i+1</em>, they can be computationally expensive when used to model large datasets (those with lots of predictors) or when the models themselves have lots of parameters. Another issue is that they don’t have any mechanisms to capture dependencies in the data, so in cases where the inputs have dependencies (image data -&gt; spatial dependenices, time-series data -&gt; temporal dependencies, clustered data -&gt; group dependencies), FCNs may not be the best choice.</p>
+</section>
+</section>
+<section id="example-model-in-pytorch" class="level2">
+<h2 class="anchored" data-anchor-id="example-model-in-pytorch">Example Model in PyTorch</h2>
+<p>The code below has a basic implementation of a fully-connected network in PyTorch. I’m using fake data and an arbitrary model architecture, so it’s not supposed to be a great model. It’s more intended to demonstrate a general workflow.</p>
+<section id="import-libraries" class="level3">
+<h3 class="anchored" data-anchor-id="import-libraries">Import Libraries</h3>
+<p>The main library I need here is <code>torch</code>. Then I’m also loading the <code>nn</code> module to create the FCN as well as some utility functions to work with the data.</p>
+<div id="235c66f9" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#import libraries</span></span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> torch <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> nn</span>
+<span id="cb1-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> torch.utils.data <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> DataLoader, TensorDataset, random_split</span></code></pre></div>
+</div>
+</section>
+<section id="generate-fake-data" class="level3">
+<h3 class="anchored" data-anchor-id="generate-fake-data">Generate Fake Data</h3>
+<p>In this step, I’m generating some fake data:</p>
+<ul>
+<li>a design matrix, <code>X</code>,</li>
+<li>a set of ground-truth betas</li>
+<li>the result of <img src="https://latex.codecogs.com/png.latex?X%20*%20%5Cbeta">, <code>y_true</code></li>
+<li><code>y_true</code> with some noise added to it, <code>y_noisy</code></li>
+</ul>
+<div id="712d5461" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># generate some true data</span></span>
+<span id="cb2-2">n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10000</span></span>
+<span id="cb2-3">m <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span></span>
+<span id="cb2-4"></span>
+<span id="cb2-5">beta <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(m)</span>
+<span id="cb2-6">X <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.randn(n, m)</span>
+<span id="cb2-7">y_true <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.matmul(X, beta)</span>
+<span id="cb2-8">y_noisy <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> y_true <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> torch.randn(n)</span>
+<span id="cb2-9">y_noisy <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> y_noisy.unsqueeze(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span></code></pre></div>
+</div>
+<p>In the last step, I have to call <code>unsqueeze()</code> on <code>y_noisy</code> to ensure it’s formatted as a tensor with the correct number of dimensions.</p>
+</section>
+<section id="process-data" class="level3">
+<h3 class="anchored" data-anchor-id="process-data">Process Data</h3>
+<p>Here, I’ll create a <code>[Dataset](https://pytorch.org/docs/stable/data.html)</code> using <code>X</code> and <code>y_noisy</code>, then I’ll do some train/test split stuff and create a <code>[Dataloader](https://pytorch.org/docs/stable/data.html)</code> for the train and test sets.</p>
+<p>I should probably create a set of notes on datasets and dataloaders in PyTorch, but for now we’ll just say that dataloaders are utility tools that help feed data into PyTorch models in batches. These are usually useful when we’re working with big data that we can’t (or don’t want to) process all at once.</p>
+<div id="bd8f04ef" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">batch_size <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">64</span></span>
+<span id="cb3-2"></span>
+<span id="cb3-3">ds <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> TensorDataset(X, y_noisy)</span>
+<span id="cb3-4"></span>
+<span id="cb3-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#splitting into train and test</span></span>
+<span id="cb3-6">trn_size <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">.8</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(X))</span>
+<span id="cb3-7">tst_size <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(X) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> trn_size</span>
+<span id="cb3-8"></span>
+<span id="cb3-9">trn, tst <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> random_split(ds, [trn_size, tst_size])</span>
+<span id="cb3-10"></span>
+<span id="cb3-11">trn_dl <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> DataLoader(trn, batch_size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>batch_size)</span>
+<span id="cb3-12">tst_dl <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> DataLoader(tst, batch_size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>batch_size)</span></code></pre></div>
+</div>
+</section>
+<section id="defining-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="defining-the-model">Defining the Model</h3>
+<p>Now that the data’s set up, it’s time to define the model. FCN’s are pretty straightforward and are composed of alternating <code>nn.Linear()</code> and activation function (e.g.&nbsp;<code>nn.ReLU()</code>) calls. These can be wrapped in <code>nn.Sequential()</code>, which makes it easier to refer to the whole stack of layers as a single module.</p>
+<p>I’m also using CUDA if it’s available.</p>
+<p>The model definition has 2 parts:</p>
+<ul>
+<li>defining an <code>__init__()</code> method;</li>
+<li>defining a <code>forward()</code> method.</li>
+</ul>
+<p><code>__init__()</code> defines the model structure/components of the model, and it tells us in the very first line (<code>class FCN(nn.Module)</code>) that our class we’re creating, <code>FCN</code>, is a subclass of (or inherits from) the <code>nn.Module</code> class. We then call the nn.Module init function (<code>super().__init__()</code>) and define what our model looks like. In this case, it’s a fully-connected sequential model. There are 10 inputs into the first layer since there are 10 columns in our <code>X</code> matrix. The choice to have 100 output features is arbitrary here, as is the size of the second linear layer (<code>nn.Linear(100, 100)</code>). The output size of the final layer is 1 since this is a regression problem, and we want our output to be a single number (in a classification problem, this would be size <em>k</em> where <em>k</em> is the number of classes in the y variable).</p>
+<p>The <code>forward()</code> method defines the order we should call the model components in. In the current case, this is very straightforward, since we’ve already wrapped all of the individual layers in <code>nn.Sequential()</code> and assigned that sequential model to an object called <code>linear_stack</code>. So in <code>forward()</code>, all we need to do is call the <code>linear_stack()</code>.</p>
+<div id="ab7a77fa" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">device <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (</span>
+<span id="cb4-2">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cuda"</span></span>
+<span id="cb4-3">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> torch.cuda.is_available()</span>
+<span id="cb4-4">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">else</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cpu"</span></span>
+<span id="cb4-5">)</span>
+<span id="cb4-6"></span>
+<span id="cb4-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#define a fully connected model</span></span>
+<span id="cb4-8"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> FCN(nn.Module):</span>
+<span id="cb4-9">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb4-10">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">super</span>().<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>()</span>
+<span id="cb4-11">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.linear_stack <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.Sequential(</span>
+<span id="cb4-12">            nn.Linear(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>),</span>
+<span id="cb4-13">            nn.ReLU(),</span>
+<span id="cb4-14">            nn.Linear(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>),</span>
+<span id="cb4-15">            nn.ReLU(),</span>
+<span id="cb4-16">            nn.Linear(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb4-17">        )</span>
+<span id="cb4-18"></span>
+<span id="cb4-19">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x):</span>
+<span id="cb4-20">        ret <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.linear_stack(x)</span>
+<span id="cb4-21">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> ret</span>
+<span id="cb4-22">    </span>
+<span id="cb4-23">model<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>FCN().to(device)</span>
+<span id="cb4-24"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(model)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>FCN(
+  (linear_stack): Sequential(
+    (0): Linear(in_features=10, out_features=100, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=100, out_features=100, bias=True)
+    (3): ReLU()
+    (4): Linear(in_features=100, out_features=1, bias=True)
+  )
+)</code></pre>
+</div>
+</div>
+<p>We could also define the model like this:</p>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> FCN(nn.Module):</span>
+<span id="cb6-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb6-3">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">super</span>().<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>()</span>
+<span id="cb6-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.l1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.Linear(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>)</span>
+<span id="cb6-5">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.l2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.Linear(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>)</span>
+<span id="cb6-6">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.l3 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.Linear(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb6-7"></span>
+<span id="cb6-8">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x):</span>
+<span id="cb6-9">        x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.l1(x)</span>
+<span id="cb6-10">        x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> F.relu(x)</span>
+<span id="cb6-11">        x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.l2(x)</span>
+<span id="cb6-12">        x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> F.relu(x)</span>
+<span id="cb6-13">        ret <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.l3(x)</span>
+<span id="cb6-14">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> ret</span></code></pre></div>
+<p>But that doesn’t feel quite as good to me.</p>
+</section>
+<section id="define-a-loss-function-and-optimizer" class="level3">
+<h3 class="anchored" data-anchor-id="define-a-loss-function-and-optimizer">Define a Loss Function and Optimizer</h3>
+<p>These are fairly straightforward. The loss function is going to be mean squared error (MSE) since it’s a regression problem. There are lots of optimizers we could use, but I don’t think it actually matters all that much here, so I’ll just use stochastic gradient descent (SGD).</p>
+<div id="dcf67be1" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">loss_fn <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.MSELoss()</span>
+<span id="cb7-2">opt <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.optim.SGD(model.parameters(), lr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1e-3</span>)</span></code></pre></div>
+</div>
+</section>
+<section id="define-a-train-method" class="level3">
+<h3 class="anchored" data-anchor-id="define-a-train-method">Define a Train Method</h3>
+<p>Now we have a model architecture specified, we have a dataloader, we have a loss function, and we have an optimizer. These are the pieces we need to train a model. So we can write a <code>train()</code> function that takes these components as arguments. Here’s what this function could look like:</p>
+<div id="1403d388" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> train(dataloader, model, loss_fn, optimizer):</span>
+<span id="cb8-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#just getting the size for printing stuff</span></span>
+<span id="cb8-3">    size <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(dataloader.dataset)</span>
+<span id="cb8-4">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#note that model.train() puts the model in 'training mode', which allows for gradient calculation</span></span>
+<span id="cb8-5">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#model.eval() is its contrasting mode</span></span>
+<span id="cb8-6">    model.train()</span>
+<span id="cb8-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> batch, (X, y) <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(dataloader):</span>
+<span id="cb8-8">        X, y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> X.to(device), y.to(device)</span>
+<span id="cb8-9"></span>
+<span id="cb8-10">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#compute error</span></span>
+<span id="cb8-11">        pred <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model(X)</span>
+<span id="cb8-12">        loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> loss_fn(pred, y)</span>
+<span id="cb8-13"></span>
+<span id="cb8-14">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#backprop</span></span>
+<span id="cb8-15">        loss.backward()</span>
+<span id="cb8-16">        optimizer.step()</span>
+<span id="cb8-17">        optimizer.zero_grad()</span>
+<span id="cb8-18"></span>
+<span id="cb8-19">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> batch <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>:</span>
+<span id="cb8-20">            loss, current <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> loss.item(), (batch <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(X)</span>
+<span id="cb8-21">            <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"loss: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>loss<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:&gt;5f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> [</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>current<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:&gt;5d}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">/</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>size<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:&gt;5d}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">]"</span>)</span></code></pre></div>
+</div>
+<p>Let’s walk through this:</p>
+<ul>
+<li>We get <code>size</code> just to help with printing progress</li>
+<li><code>model.train()</code> puts the model in “train” mode, which lets us calculate the gradient</li>
+<li>We then iterate over all of the batches in our dataloader…</li>
+<li>We move <code>X</code> and <code>y</code> to the GPU (if it’s available)</li>
+<li>Make predictions from the model</li>
+<li>Calculate the loss (using the specified loss function)</li>
+<li>Calculate the gradient of the loss function for all model parameters (via <code>loss.backward()</code>)</li>
+<li>Update the model parameters by applying the optimizer’s rules (<code>optimizer.step()</code>)</li>
+<li>Zero out the gradients so they can be calculated again (<code>optimizer.zero_grad()</code>)</li>
+<li>Then we do some printing at the end of the loop to show our progress.</li>
+</ul>
+</section>
+<section id="define-the-test-method" class="level3">
+<h3 class="anchored" data-anchor-id="define-the-test-method">Define the Test Method</h3>
+<p>Unlike the <code>train()</code> function we just defined, <code>test()</code> doesn’t do parameter optimization – it simply shows how well the model performs on a holdout (test) set of data. This is why we don’t need to include the optimizer as a function argument – we aren’t doing any optimizing.</p>
+<p>Here’s the code for our <code>test()</code> function:</p>
+<div id="a2fbd338" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> test(dataloader, model, loss_fn):</span>
+<span id="cb9-2">    size <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(dataloader.dataset)</span>
+<span id="cb9-3">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#set model into eval mode</span></span>
+<span id="cb9-4">    model.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">eval</span>()</span>
+<span id="cb9-5">    test_loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span></span>
+<span id="cb9-6"></span>
+<span id="cb9-7">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#set up so we're not calculating gradients</span></span>
+<span id="cb9-8">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">with</span> torch.no_grad():</span>
+<span id="cb9-9">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> X, y <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> dataloader:</span>
+<span id="cb9-10">            X, y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> X.to(device), y.to(device)</span>
+<span id="cb9-11">            pred <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model(X)</span>
+<span id="cb9-12">            test_loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+=</span> loss_fn(pred, y).item() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> X.size(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb9-13">    avg_loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> test_loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> size</span>
+<span id="cb9-14">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Avg Loss: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>avg_loss<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:&gt;7f}</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div>
+</div>
+<p>And we can walk through it:</p>
+<ul>
+<li>In this function, <code>size</code> is actually useful in calculating our loss. We have to do some kinda wonky slight-of-hand when estimating the model loss here. We are using mean-squared error (MSE) as our loss function, and for each batch in the dataloader, it will give us the mean-squared error (a single number per batch). We then multiply this average loss by the size of the batch to get the “total” loss per batch, and we sum up all of the total batch losses to get the total overall loss (<code>test_loss</code> in the function). Since this is the total loss, we then have to divide by the number of observations to get us back to the mean squared error.</li>
+<li><code>model.eval()</code> puts the model into evaluation mode, signaling that we’re not going to be calculating gradients or anything like that.</li>
+<li>We initialize <code>test_loss</code> to 0</li>
+<li>Then for the remainder, we make predictions (just like we did in the <code>train()</code> function) and calculate loss as described in the first bullet point above.</li>
+</ul>
+</section>
+<section id="train-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="train-the-model">Train the Model</h3>
+<p>Now we can finally train the model. We’ll train over 5 “epochs”, i.e.&nbsp;5 passes through the full dataset. This is arbitrary here – in real-world contexts this is a number we probably want to tune for or at least choose carefully.</p>
+<p>We do the traning with a simple <code>for</code> loop, and during each iteration through the loop we:</p>
+<ol type="1">
+<li>train the model;</li>
+<li>show the performance on the test set</li>
+</ol>
+<p>Since we included some print statements in our <code>train()</code> and <code>test()</code> functions, we can monitor the progress of our model’s training.</p>
+<div id="b5b10aa7" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">epochs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span></span>
+<span id="cb10-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(epochs):</span>
+<span id="cb10-3">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Epoch </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">------------------"</span>)</span>
+<span id="cb10-4">    train(trn_dl, model, loss_fn, opt)</span>
+<span id="cb10-5">    test(tst_dl, model, loss_fn)</span>
+<span id="cb10-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Done!"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Epoch 1
+------------------
+loss: 5.130811 [   64/ 8000]
+loss: 7.558138 [  704/ 8000]
+loss: 6.512156 [ 1344/ 8000]
+loss: 5.550046 [ 1984/ 8000]
+loss: 7.068350 [ 2624/ 8000]
+loss: 6.254210 [ 3264/ 8000]
+loss: 6.333334 [ 3904/ 8000]
+loss: 6.672968 [ 4544/ 8000]
+loss: 6.011800 [ 5184/ 8000]
+loss: 6.281922 [ 5824/ 8000]
+loss: 5.252160 [ 6464/ 8000]
+loss: 5.972773 [ 7104/ 8000]
+loss: 5.569077 [ 7744/ 8000]
+Avg Loss: 5.857892
+
+Epoch 2
+------------------
+loss: 4.593849 [   64/ 8000]
+loss: 6.697829 [  704/ 8000]
+loss: 5.681279 [ 1344/ 8000]
+loss: 4.791214 [ 1984/ 8000]
+loss: 5.994133 [ 2624/ 8000]
+loss: 5.362798 [ 3264/ 8000]
+loss: 5.297074 [ 3904/ 8000]
+loss: 5.547976 [ 4544/ 8000]
+loss: 4.942132 [ 5184/ 8000]
+loss: 4.995830 [ 5824/ 8000]
+loss: 4.198215 [ 6464/ 8000]
+loss: 4.676771 [ 7104/ 8000]
+loss: 4.366837 [ 7744/ 8000]
+Avg Loss: 4.493579
+
+Epoch 3
+------------------
+loss: 3.628562 [   64/ 8000]
+loss: 5.131055 [  704/ 8000]
+loss: 4.146622 [ 1344/ 8000]
+loss: 3.396595 [ 1984/ 8000]
+loss: 4.028492 [ 2624/ 8000]
+loss: 3.745448 [ 3264/ 8000]
+loss: 3.482335 [ 3904/ 8000]
+loss: 3.576678 [ 4544/ 8000]
+loss: 3.107245 [ 5184/ 8000]
+loss: 2.927510 [ 5824/ 8000]
+loss: 2.533787 [ 6464/ 8000]
+loss: 2.630936 [ 7104/ 8000]
+loss: 2.594630 [ 7744/ 8000]
+Avg Loss: 2.529012
+
+Epoch 4
+------------------
+loss: 2.220653 [   64/ 8000]
+loss: 2.848730 [  704/ 8000]
+loss: 2.130622 [ 1344/ 8000]
+loss: 1.705244 [ 1984/ 8000]
+loss: 1.762509 [ 2624/ 8000]
+loss: 1.957887 [ 3264/ 8000]
+loss: 1.728549 [ 3904/ 8000]
+loss: 1.747250 [ 4544/ 8000]
+loss: 1.522444 [ 5184/ 8000]
+loss: 1.378201 [ 5824/ 8000]
+loss: 1.367811 [ 6464/ 8000]
+loss: 1.194838 [ 7104/ 8000]
+loss: 1.488245 [ 7744/ 8000]
+Avg Loss: 1.383161
+
+Epoch 5
+------------------
+loss: 1.386802 [   64/ 8000]
+loss: 1.463986 [  704/ 8000]
+loss: 1.139213 [ 1344/ 8000]
+loss: 0.983471 [ 1984/ 8000]
+loss: 0.841175 [ 2624/ 8000]
+loss: 1.235995 [ 3264/ 8000]
+loss: 1.212063 [ 3904/ 8000]
+loss: 1.196411 [ 4544/ 8000]
+loss: 1.063424 [ 5184/ 8000]
+loss: 1.051633 [ 5824/ 8000]
+loss: 1.127206 [ 6464/ 8000]
+loss: 0.833066 [ 7104/ 8000]
+loss: 1.255609 [ 7744/ 8000]
+Avg Loss: 1.170692
+
+Done!</code></pre>
+</div>
+</div>
+<p>And that’s a complete step-by-step for a fully-connected neural net!</p>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/Deep_Learning/pytorch_fully_connected.html</guid>
+  <pubDate>Fri, 16 Aug 2024 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Deep Learning Overview</title>
   <dc:creator>Eric Ekholm</dc:creator>

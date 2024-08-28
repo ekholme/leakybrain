@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.54">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Eric Ekholm">
+<meta name="dcterms.date" content="2024-08-16">
+<meta name="description" content="Implementing a fully connected neural network in PyTorch">
+
+<title>Fully Connected Network in PyTorch – leakybrain</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">
+      leakybrain
+      </li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">leakybrain</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/ekholme/leakybrain" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../databases.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Databases</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../deep_learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deep Learning</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gcp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">GCP</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../go.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Go</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../julia.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Julia</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../linux.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linux</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../python.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Python</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../r.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">R</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stats</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#what-is-an-fcn" id="toc-what-is-an-fcn" class="nav-link active" data-scroll-target="#what-is-an-fcn">What is an FCN?</a>
+  <ul class="collapse">
+  <li><a href="#strengths-and-weaknesses" id="toc-strengths-and-weaknesses" class="nav-link" data-scroll-target="#strengths-and-weaknesses">Strengths and Weaknesses</a></li>
+  </ul></li>
+  <li><a href="#example-model-in-pytorch" id="toc-example-model-in-pytorch" class="nav-link" data-scroll-target="#example-model-in-pytorch">Example Model in PyTorch</a>
+  <ul class="collapse">
+  <li><a href="#import-libraries" id="toc-import-libraries" class="nav-link" data-scroll-target="#import-libraries">Import Libraries</a></li>
+  <li><a href="#generate-fake-data" id="toc-generate-fake-data" class="nav-link" data-scroll-target="#generate-fake-data">Generate Fake Data</a></li>
+  <li><a href="#process-data" id="toc-process-data" class="nav-link" data-scroll-target="#process-data">Process Data</a></li>
+  <li><a href="#defining-the-model" id="toc-defining-the-model" class="nav-link" data-scroll-target="#defining-the-model">Defining the Model</a></li>
+  <li><a href="#define-a-loss-function-and-optimizer" id="toc-define-a-loss-function-and-optimizer" class="nav-link" data-scroll-target="#define-a-loss-function-and-optimizer">Define a Loss Function and Optimizer</a></li>
+  <li><a href="#define-a-train-method" id="toc-define-a-train-method" class="nav-link" data-scroll-target="#define-a-train-method">Define a Train Method</a></li>
+  <li><a href="#define-the-test-method" id="toc-define-the-test-method" class="nav-link" data-scroll-target="#define-the-test-method">Define the Test Method</a></li>
+  <li><a href="#train-the-model" id="toc-train-the-model" class="nav-link" data-scroll-target="#train-the-model">Train the Model</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Fully Connected Network in PyTorch</h1>
+</div>
+
+<div>
+  <div class="description">
+    <p>Implementing a fully connected neural network in PyTorch</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p><a href="https://ericekholm.com">Eric Ekholm</a> </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 16, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This page contains my notes on how to implement a fully-connected neural network (FCN) in PyTorch. It’s meant to be a bare-bones, basic implementation of an FCN.</p>
+<section id="what-is-an-fcn" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-an-fcn">What is an FCN?</h2>
+<p>A fully connected network (FCN) is an architecture with a bunch of densely-connected layers stacked on top of one another. In this architecture, each node in layer <em>i</em> is connected to each node of layer <em>i+1</em>, etc, with the output of each layer being passed through an activation function before being sent to the next layer. Here’s what this looks like:</p>
+<p><img src="https://miro.medium.com/v2/resize:fit:720/1*VHOUViL8dHGfvxCsswPv-Q.png" class="img-fluid"></p>
+<p>In PyTorch parlance, these are linear layers, and they can be specified via <code>nn.Linear(in_size, out_size)</code>. Other frameworks might call them other things (e.g.&nbsp;Flux.jl calls them <a href="https://fluxml.ai/Flux.jl/previews/PR1613/models/layers/">Dense layers</a>).</p>
+<section id="strengths-and-weaknesses" class="level3">
+<h3 class="anchored" data-anchor-id="strengths-and-weaknesses">Strengths and Weaknesses</h3>
+<p>FCNs are flexible models that can do well at all sorts of “typical” machine-learning tasks (i.e.&nbsp;classification and regression), and can work with various types of inputs (images, text, etc.). They’re basically the linear regression of the deep learning world (in that they’re foundational models, not in the sense that they’re linear…because they aren’t).</p>
+<p>Since FCNs connect all nodes in layer <em>i</em> to all nodes in layer <em>i+1</em>, they can be computationally expensive when used to model large datasets (those with lots of predictors) or when the models themselves have lots of parameters. Another issue is that they don’t have any mechanisms to capture dependencies in the data, so in cases where the inputs have dependencies (image data -&gt; spatial dependenices, time-series data -&gt; temporal dependencies, clustered data -&gt; group dependencies), FCNs may not be the best choice.</p>
+</section>
+</section>
+<section id="example-model-in-pytorch" class="level2">
+<h2 class="anchored" data-anchor-id="example-model-in-pytorch">Example Model in PyTorch</h2>
+<p>The code below has a basic implementation of a fully-connected network in PyTorch. I’m using fake data and an arbitrary model architecture, so it’s not supposed to be a great model. It’s more intended to demonstrate a general workflow.</p>
+<section id="import-libraries" class="level3">
+<h3 class="anchored" data-anchor-id="import-libraries">Import Libraries</h3>
+<p>The main library I need here is <code>torch</code>. Then I’m also loading the <code>nn</code> module to create the FCN as well as some utility functions to work with the data.</p>
+<div id="235c66f9" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#import libraries</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch <span class="im">import</span> nn</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader, TensorDataset, random_split</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="generate-fake-data" class="level3">
+<h3 class="anchored" data-anchor-id="generate-fake-data">Generate Fake Data</h3>
+<p>In this step, I’m generating some fake data:</p>
+<ul>
+<li>a design matrix, <code>X</code>,</li>
+<li>a set of ground-truth betas</li>
+<li>the result of <span class="math inline">\(X * \beta\)</span>, <code>y_true</code></li>
+<li><code>y_true</code> with some noise added to it, <code>y_noisy</code></li>
+</ul>
+<div id="712d5461" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># generate some true data</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">10000</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> torch.randn(m)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> torch.randn(n, m)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>y_true <span class="op">=</span> torch.matmul(X, beta)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>y_noisy <span class="op">=</span> y_true <span class="op">+</span> torch.randn(n)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>y_noisy <span class="op">=</span> y_noisy.unsqueeze(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In the last step, I have to call <code>unsqueeze()</code> on <code>y_noisy</code> to ensure it’s formatted as a tensor with the correct number of dimensions.</p>
+</section>
+<section id="process-data" class="level3">
+<h3 class="anchored" data-anchor-id="process-data">Process Data</h3>
+<p>Here, I’ll create a <code>[Dataset](https://pytorch.org/docs/stable/data.html)</code> using <code>X</code> and <code>y_noisy</code>, then I’ll do some train/test split stuff and create a <code>[Dataloader](https://pytorch.org/docs/stable/data.html)</code> for the train and test sets.</p>
+<p>I should probably create a set of notes on datasets and dataloaders in PyTorch, but for now we’ll just say that dataloaders are utility tools that help feed data into PyTorch models in batches. These are usually useful when we’re working with big data that we can’t (or don’t want to) process all at once.</p>
+<div id="bd8f04ef" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">64</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> TensorDataset(X, y_noisy)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#splitting into train and test</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>trn_size <span class="op">=</span> <span class="bu">int</span>(<span class="fl">.8</span> <span class="op">*</span> <span class="bu">len</span>(X))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>tst_size <span class="op">=</span> <span class="bu">len</span>(X) <span class="op">-</span> trn_size</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>trn, tst <span class="op">=</span> random_split(ds, [trn_size, tst_size])</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>trn_dl <span class="op">=</span> DataLoader(trn, batch_size<span class="op">=</span>batch_size)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>tst_dl <span class="op">=</span> DataLoader(tst, batch_size<span class="op">=</span>batch_size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="defining-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="defining-the-model">Defining the Model</h3>
+<p>Now that the data’s set up, it’s time to define the model. FCN’s are pretty straightforward and are composed of alternating <code>nn.Linear()</code> and activation function (e.g.&nbsp;<code>nn.ReLU()</code>) calls. These can be wrapped in <code>nn.Sequential()</code>, which makes it easier to refer to the whole stack of layers as a single module.</p>
+<p>I’m also using CUDA if it’s available.</p>
+<p>The model definition has 2 parts:</p>
+<ul>
+<li>defining an <code>__init__()</code> method;</li>
+<li>defining a <code>forward()</code> method.</li>
+</ul>
+<p><code>__init__()</code> defines the model structure/components of the model, and it tells us in the very first line (<code>class FCN(nn.Module)</code>) that our class we’re creating, <code>FCN</code>, is a subclass of (or inherits from) the <code>nn.Module</code> class. We then call the nn.Module init function (<code>super().__init__()</code>) and define what our model looks like. In this case, it’s a fully-connected sequential model. There are 10 inputs into the first layer since there are 10 columns in our <code>X</code> matrix. The choice to have 100 output features is arbitrary here, as is the size of the second linear layer (<code>nn.Linear(100, 100)</code>). The output size of the final layer is 1 since this is a regression problem, and we want our output to be a single number (in a classification problem, this would be size <em>k</em> where <em>k</em> is the number of classes in the y variable).</p>
+<p>The <code>forward()</code> method defines the order we should call the model components in. In the current case, this is very straightforward, since we’ve already wrapped all of the individual layers in <code>nn.Sequential()</code> and assigned that sequential model to an object called <code>linear_stack</code>. So in <code>forward()</code>, all we need to do is call the <code>linear_stack()</code>.</p>
+<div id="ab7a77fa" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> (</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cuda"</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> torch.cuda.is_available()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"cpu"</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#define a fully connected model</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FCN(nn.Module):</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.linear_stack <span class="op">=</span> nn.Sequential(</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">10</span>, <span class="dv">100</span>),</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">100</span>, <span class="dv">100</span>),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        ret <span class="op">=</span> <span class="va">self</span>.linear_stack(x)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ret</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>model<span class="op">=</span>FCN().to(device)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>FCN(
+  (linear_stack): Sequential(
+    (0): Linear(in_features=10, out_features=100, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=100, out_features=100, bias=True)
+    (3): ReLU()
+    (4): Linear(in_features=100, out_features=1, bias=True)
+  )
+)</code></pre>
+</div>
+</div>
+<p>We could also define the model like this:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FCN(nn.Module):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.l1 <span class="op">=</span> nn.Linear(<span class="dv">10</span>, <span class="dv">100</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.l2 <span class="op">=</span> nn.Linear(<span class="dv">100</span>, <span class="dv">100</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.l3 <span class="op">=</span> nn.Linear(<span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.l1(x)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> F.relu(x)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.l2(x)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> F.relu(x)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        ret <span class="op">=</span> <span class="va">self</span>.l3(x)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ret</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>But that doesn’t feel quite as good to me.</p>
+</section>
+<section id="define-a-loss-function-and-optimizer" class="level3">
+<h3 class="anchored" data-anchor-id="define-a-loss-function-and-optimizer">Define a Loss Function and Optimizer</h3>
+<p>These are fairly straightforward. The loss function is going to be mean squared error (MSE) since it’s a regression problem. There are lots of optimizers we could use, but I don’t think it actually matters all that much here, so I’ll just use stochastic gradient descent (SGD).</p>
+<div id="dcf67be1" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="op">=</span> nn.MSELoss()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> torch.optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="define-a-train-method" class="level3">
+<h3 class="anchored" data-anchor-id="define-a-train-method">Define a Train Method</h3>
+<p>Now we have a model architecture specified, we have a dataloader, we have a loss function, and we have an optimizer. These are the pieces we need to train a model. So we can write a <code>train()</code> function that takes these components as arguments. Here’s what this function could look like:</p>
+<div id="1403d388" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(dataloader, model, loss_fn, optimizer):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">#just getting the size for printing stuff</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="bu">len</span>(dataloader.dataset)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">#note that model.train() puts the model in 'training mode', which allows for gradient calculation</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">#model.eval() is its contrasting mode</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> batch, (X, y) <span class="kw">in</span> <span class="bu">enumerate</span>(dataloader):</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        X, y <span class="op">=</span> X.to(device), y.to(device)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">#compute error</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        pred <span class="op">=</span> model(X)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> loss_fn(pred, y)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">#backprop</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> batch <span class="op">%</span> <span class="dv">10</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>            loss, current <span class="op">=</span> loss.item(), (batch <span class="op">+</span> <span class="dv">1</span>) <span class="op">*</span> <span class="bu">len</span>(X)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"loss: </span><span class="sc">{</span>loss<span class="sc">:&gt;5f}</span><span class="ss"> [</span><span class="sc">{</span>current<span class="sc">:&gt;5d}</span><span class="ss">/</span><span class="sc">{</span>size<span class="sc">:&gt;5d}</span><span class="ss">]"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s walk through this:</p>
+<ul>
+<li>We get <code>size</code> just to help with printing progress</li>
+<li><code>model.train()</code> puts the model in “train” mode, which lets us calculate the gradient</li>
+<li>We then iterate over all of the batches in our dataloader…</li>
+<li>We move <code>X</code> and <code>y</code> to the GPU (if it’s available)</li>
+<li>Make predictions from the model</li>
+<li>Calculate the loss (using the specified loss function)</li>
+<li>Calculate the gradient of the loss function for all model parameters (via <code>loss.backward()</code>)</li>
+<li>Update the model parameters by applying the optimizer’s rules (<code>optimizer.step()</code>)</li>
+<li>Zero out the gradients so they can be calculated again (<code>optimizer.zero_grad()</code>)</li>
+<li>Then we do some printing at the end of the loop to show our progress.</li>
+</ul>
+</section>
+<section id="define-the-test-method" class="level3">
+<h3 class="anchored" data-anchor-id="define-the-test-method">Define the Test Method</h3>
+<p>Unlike the <code>train()</code> function we just defined, <code>test()</code> doesn’t do parameter optimization – it simply shows how well the model performs on a holdout (test) set of data. This is why we don’t need to include the optimizer as a function argument – we aren’t doing any optimizing.</p>
+<p>Here’s the code for our <code>test()</code> function:</p>
+<div id="a2fbd338" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test(dataloader, model, loss_fn):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="bu">len</span>(dataloader.dataset)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">#set model into eval mode</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    test_loss <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">#set up so we're not calculating gradients</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> X, y <span class="kw">in</span> dataloader:</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>            X, y <span class="op">=</span> X.to(device), y.to(device)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>            pred <span class="op">=</span> model(X)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>            test_loss <span class="op">+=</span> loss_fn(pred, y).item() <span class="op">*</span> X.size(<span class="dv">0</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    avg_loss <span class="op">=</span> test_loss <span class="op">/</span> size</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Avg Loss: </span><span class="sc">{</span>avg_loss<span class="sc">:&gt;7f}</span><span class="ch">\n</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And we can walk through it:</p>
+<ul>
+<li>In this function, <code>size</code> is actually useful in calculating our loss. We have to do some kinda wonky slight-of-hand when estimating the model loss here. We are using mean-squared error (MSE) as our loss function, and for each batch in the dataloader, it will give us the mean-squared error (a single number per batch). We then multiply this average loss by the size of the batch to get the “total” loss per batch, and we sum up all of the total batch losses to get the total overall loss (<code>test_loss</code> in the function). Since this is the total loss, we then have to divide by the number of observations to get us back to the mean squared error.</li>
+<li><code>model.eval()</code> puts the model into evaluation mode, signaling that we’re not going to be calculating gradients or anything like that.</li>
+<li>We initialize <code>test_loss</code> to 0</li>
+<li>Then for the remainder, we make predictions (just like we did in the <code>train()</code> function) and calculate loss as described in the first bullet point above.</li>
+</ul>
+</section>
+<section id="train-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="train-the-model">Train the Model</h3>
+<p>Now we can finally train the model. We’ll train over 5 “epochs”, i.e.&nbsp;5 passes through the full dataset. This is arbitrary here – in real-world contexts this is a number we probably want to tune for or at least choose carefully.</p>
+<p>We do the traning with a simple <code>for</code> loop, and during each iteration through the loop we:</p>
+<ol type="1">
+<li>train the model;</li>
+<li>show the performance on the test set</li>
+</ol>
+<p>Since we included some print statements in our <code>train()</code> and <code>test()</code> functions, we can monitor the progress of our model’s training.</p>
+<div id="b5b10aa7" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ch">\n</span><span class="ss">------------------"</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    train(trn_dl, model, loss_fn, opt)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    test(tst_dl, model, loss_fn)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Done!"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Epoch 1
+------------------
+loss: 5.130811 [   64/ 8000]
+loss: 7.558138 [  704/ 8000]
+loss: 6.512156 [ 1344/ 8000]
+loss: 5.550046 [ 1984/ 8000]
+loss: 7.068350 [ 2624/ 8000]
+loss: 6.254210 [ 3264/ 8000]
+loss: 6.333334 [ 3904/ 8000]
+loss: 6.672968 [ 4544/ 8000]
+loss: 6.011800 [ 5184/ 8000]
+loss: 6.281922 [ 5824/ 8000]
+loss: 5.252160 [ 6464/ 8000]
+loss: 5.972773 [ 7104/ 8000]
+loss: 5.569077 [ 7744/ 8000]
+Avg Loss: 5.857892
+
+Epoch 2
+------------------
+loss: 4.593849 [   64/ 8000]
+loss: 6.697829 [  704/ 8000]
+loss: 5.681279 [ 1344/ 8000]
+loss: 4.791214 [ 1984/ 8000]
+loss: 5.994133 [ 2624/ 8000]
+loss: 5.362798 [ 3264/ 8000]
+loss: 5.297074 [ 3904/ 8000]
+loss: 5.547976 [ 4544/ 8000]
+loss: 4.942132 [ 5184/ 8000]
+loss: 4.995830 [ 5824/ 8000]
+loss: 4.198215 [ 6464/ 8000]
+loss: 4.676771 [ 7104/ 8000]
+loss: 4.366837 [ 7744/ 8000]
+Avg Loss: 4.493579
+
+Epoch 3
+------------------
+loss: 3.628562 [   64/ 8000]
+loss: 5.131055 [  704/ 8000]
+loss: 4.146622 [ 1344/ 8000]
+loss: 3.396595 [ 1984/ 8000]
+loss: 4.028492 [ 2624/ 8000]
+loss: 3.745448 [ 3264/ 8000]
+loss: 3.482335 [ 3904/ 8000]
+loss: 3.576678 [ 4544/ 8000]
+loss: 3.107245 [ 5184/ 8000]
+loss: 2.927510 [ 5824/ 8000]
+loss: 2.533787 [ 6464/ 8000]
+loss: 2.630936 [ 7104/ 8000]
+loss: 2.594630 [ 7744/ 8000]
+Avg Loss: 2.529012
+
+Epoch 4
+------------------
+loss: 2.220653 [   64/ 8000]
+loss: 2.848730 [  704/ 8000]
+loss: 2.130622 [ 1344/ 8000]
+loss: 1.705244 [ 1984/ 8000]
+loss: 1.762509 [ 2624/ 8000]
+loss: 1.957887 [ 3264/ 8000]
+loss: 1.728549 [ 3904/ 8000]
+loss: 1.747250 [ 4544/ 8000]
+loss: 1.522444 [ 5184/ 8000]
+loss: 1.378201 [ 5824/ 8000]
+loss: 1.367811 [ 6464/ 8000]
+loss: 1.194838 [ 7104/ 8000]
+loss: 1.488245 [ 7744/ 8000]
+Avg Loss: 1.383161
+
+Epoch 5
+------------------
+loss: 1.386802 [   64/ 8000]
+loss: 1.463986 [  704/ 8000]
+loss: 1.139213 [ 1344/ 8000]
+loss: 0.983471 [ 1984/ 8000]
+loss: 0.841175 [ 2624/ 8000]
+loss: 1.235995 [ 3264/ 8000]
+loss: 1.212063 [ 3904/ 8000]
+loss: 1.196411 [ 4544/ 8000]
+loss: 1.063424 [ 5184/ 8000]
+loss: 1.051633 [ 5824/ 8000]
+loss: 1.127206 [ 6464/ 8000]
+loss: 0.833066 [ 7104/ 8000]
+loss: 1.255609 [ 7744/ 8000]
+Avg Loss: 1.170692
+
+Done!</code></pre>
+</div>
+</div>
+<p>And that’s a complete step-by-step for a fully-connected neural net!</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/leakybrain\.ericekholm\.com");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
