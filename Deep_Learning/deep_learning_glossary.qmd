@@ -1,0 +1,20 @@
+---
+title: "Deep Learning Glossary"
+description: |
+  Glossary of deep learning terms
+date: 2024-08-29
+format:
+  html:
+    code-fold: false
+execute:
+  freeze: auto
+tags: [deep learning]
+---
+
+## Data Utilities
+
+**Dataloader.** A Dataloader is a utility tool in pytorch (and other deep learning libraries) that helps you to load data into a model. One of the biggest reasons its useful is that it supports batching -- dividing the data into smaller batches so the model can train more efficiently. Dataloaders also support random shuffling (which can help prevent overfitting) and some data transformations (so you can transform data as it's loaded into the model). They also allow you to parallelize training.
+
+## Training Loop 
+
+**Epoch.** An epoch is just one pass through your whole dataset. So if you have a 1,000 observation dataset, and you pass it into your model in 10 batches of 100, you would train 1 epoch after completing all 10 batches. Typically, models will train over several epochs, although that may not always be the case if you're fine-tuning models.

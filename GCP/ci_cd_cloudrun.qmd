@@ -19,25 +19,65 @@ There may be some additional setup/service account permissions that need to be s
 gcloud artifacts repositories create REPO_NAME --format docker --region us-east4
 ```
 
-From there, the `cloudbuild.yaml` file should look like this:
+From there, the `cloudbuild.yaml` file should look roughly like this:
 
 ```yaml
+substitutions:
+  _REPO_NAME: 'my-repo'
+  _IMAGE_NAME: 'my-image'
+  _REGION: 'us-east4'
+  _TAG: 'prod'
+  _SERVICE: 'my-service'
+
 steps:
   #docker build 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t',
-            'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA',
-            '.']
+    args: 
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '.'
+
   #docker push to artifact registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA']
-
+    args: 
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '.'
+  
   #deploy the container to cloud run
   - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['run', 'deploy', 'SERVICE-NAME', '--image', 'us-east4-docker.pkg.dev/${PROJECT_ID}/REPO_NAME/IMAGE_NAME:$COMMIT_SHA', '--region', 'us-east4']
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE}'
+      - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_IMAGE_NAME}:${_TAG}'
+      - '--region=${_REGION}'
+      - '--max-instances=1'
+      - '--min-instances=0'
+      - '--tag=${_TAG}'
+      - '--cpu=1'
+      - '--memory=2Gi'
+      - '--allow-unauthenticated'
+      - '--set-secrets=/my_mount/MY_SECRET=MY_SECRET:latest'
+      - '--concurrency=80'
+      - '--port=8080'
 
 #optional but prob worth setting
 timeout: 3600s
+
+options:
+  logging: CLOUD_LOGGING_ONLY
 ```
 
-And then replace anything in ALL_CAPS above (without a $) with the relevant values
+Walking through what some of the above does...
+
+The `substitutions` section allows us to set variables to pass to other steps in the build process. We can set default values for these variables, but we can also substitute different values if we need to. Like, we could configure our CI/CD to substitute different values in for prod and test environments.
+
+I think the Docker stuff is fairly straightforward -- it's just building a Docker image (step 1) and pushing the built image to Google's Artifact Repository (step 2).
+
+Step 3 -- where we're deploying the image to Google Cloud Run -- is more involved. We're setting various options here, such as allocating 2GB of memory to our instance, allocating 1 CPU, ensuring we have a maximum of 1 instance available and a minimum of 0 instances, etc. Even though we're doing quite a few things here, most of the options are kind of obvious (and there are lots more we could specify but don't).
+
+The one option that's a bit confusing is the `--set-secrets` option. Here, we're mounting a secret to `/my_mount/MY_SECRET`. We define the secret (which is managed in Google Secret Manager in this case) by setting `/my_mount/MY_SECRET=MY_SECRET:latest`, which specifies that we want to use the latest version of `MY_SECRET`.
+

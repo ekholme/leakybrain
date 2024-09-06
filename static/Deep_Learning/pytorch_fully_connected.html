@@ -315,7 +315,7 @@ window.Quarto = {
 <section id="import-libraries" class="level3">
 <h3 class="anchored" data-anchor-id="import-libraries">Import Libraries</h3>
 <p>The main library I need here is <code>torch</code>. Then I’m also loading the <code>nn</code> module to create the FCN as well as some utility functions to work with the data.</p>
-<div id="235c66f9" class="cell" data-execution_count="1">
+<div id="1b20b318" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#import libraries</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch <span class="im">import</span> nn</span>
@@ -331,7 +331,7 @@ window.Quarto = {
 <li>the result of <span class="math inline">\(X * \beta\)</span>, <code>y_true</code></li>
 <li><code>y_true</code> with some noise added to it, <code>y_noisy</code></li>
 </ul>
-<div id="712d5461" class="cell" data-execution_count="2">
+<div id="87322cad" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># generate some true data</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">10000</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> <span class="dv">10</span></span>
@@ -346,9 +346,9 @@ window.Quarto = {
 </section>
 <section id="process-data" class="level3">
 <h3 class="anchored" data-anchor-id="process-data">Process Data</h3>
-<p>Here, I’ll create a <code>[Dataset](https://pytorch.org/docs/stable/data.html)</code> using <code>X</code> and <code>y_noisy</code>, then I’ll do some train/test split stuff and create a <code>[Dataloader](https://pytorch.org/docs/stable/data.html)</code> for the train and test sets.</p>
+<p>Here, I’ll create a <a href="https://pytorch.org/docs/stable/data.html">Dataset</a> using <code>X</code> and <code>y_noisy</code>, then I’ll do some train/test split stuff and create a <a href="https://pytorch.org/docs/stable/data.html">Dataloader</a> for the train and test sets.</p>
 <p>I should probably create a set of notes on datasets and dataloaders in PyTorch, but for now we’ll just say that dataloaders are utility tools that help feed data into PyTorch models in batches. These are usually useful when we’re working with big data that we can’t (or don’t want to) process all at once.</p>
-<div id="bd8f04ef" class="cell" data-execution_count="3">
+<div id="97afd00b" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">64</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> TensorDataset(X, y_noisy)</span>
@@ -374,7 +374,7 @@ window.Quarto = {
 </ul>
 <p><code>__init__()</code> defines the model structure/components of the model, and it tells us in the very first line (<code>class FCN(nn.Module)</code>) that our class we’re creating, <code>FCN</code>, is a subclass of (or inherits from) the <code>nn.Module</code> class. We then call the nn.Module init function (<code>super().__init__()</code>) and define what our model looks like. In this case, it’s a fully-connected sequential model. There are 10 inputs into the first layer since there are 10 columns in our <code>X</code> matrix. The choice to have 100 output features is arbitrary here, as is the size of the second linear layer (<code>nn.Linear(100, 100)</code>). The output size of the final layer is 1 since this is a regression problem, and we want our output to be a single number (in a classification problem, this would be size <em>k</em> where <em>k</em> is the number of classes in the y variable).</p>
 <p>The <code>forward()</code> method defines the order we should call the model components in. In the current case, this is very straightforward, since we’ve already wrapped all of the individual layers in <code>nn.Sequential()</code> and assigned that sequential model to an object called <code>linear_stack</code>. So in <code>forward()</code>, all we need to do is call the <code>linear_stack()</code>.</p>
-<div id="ab7a77fa" class="cell" data-execution_count="4">
+<div id="7eeaacee" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> (</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cuda"</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> torch.cuda.is_available()</span>
@@ -431,7 +431,7 @@ window.Quarto = {
 <section id="define-a-loss-function-and-optimizer" class="level3">
 <h3 class="anchored" data-anchor-id="define-a-loss-function-and-optimizer">Define a Loss Function and Optimizer</h3>
 <p>These are fairly straightforward. The loss function is going to be mean squared error (MSE) since it’s a regression problem. There are lots of optimizers we could use, but I don’t think it actually matters all that much here, so I’ll just use stochastic gradient descent (SGD).</p>
-<div id="dcf67be1" class="cell" data-execution_count="5">
+<div id="d7fe21c4" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="op">=</span> nn.MSELoss()</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> torch.optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -439,7 +439,7 @@ window.Quarto = {
 <section id="define-a-train-method" class="level3">
 <h3 class="anchored" data-anchor-id="define-a-train-method">Define a Train Method</h3>
 <p>Now we have a model architecture specified, we have a dataloader, we have a loss function, and we have an optimizer. These are the pieces we need to train a model. So we can write a <code>train()</code> function that takes these components as arguments. Here’s what this function could look like:</p>
-<div id="1403d388" class="cell" data-execution_count="6">
+<div id="237a047d" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(dataloader, model, loss_fn, optimizer):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">#just getting the size for printing stuff</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="bu">len</span>(dataloader.dataset)</span>
@@ -480,7 +480,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="define-the-test-method">Define the Test Method</h3>
 <p>Unlike the <code>train()</code> function we just defined, <code>test()</code> doesn’t do parameter optimization – it simply shows how well the model performs on a holdout (test) set of data. This is why we don’t need to include the optimizer as a function argument – we aren’t doing any optimizing.</p>
 <p>Here’s the code for our <code>test()</code> function:</p>
-<div id="a2fbd338" class="cell" data-execution_count="7">
+<div id="ff985ea9" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test(dataloader, model, loss_fn):</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    size <span class="op">=</span> <span class="bu">len</span>(dataloader.dataset)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">#set model into eval mode</span></span>
@@ -513,7 +513,7 @@ window.Quarto = {
 <li>show the performance on the test set</li>
 </ol>
 <p>Since we included some print statements in our <code>train()</code> and <code>test()</code> functions, we can monitor the progress of our model’s training.</p>
-<div id="b5b10aa7" class="cell" data-execution_count="8">
+<div id="20f82410" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>epochs <span class="op">=</span> <span class="dv">5</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span>i<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ch">\n</span><span class="ss">------------------"</span>)</span>
@@ -523,88 +523,88 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>Epoch 1
 ------------------
-loss: 5.130811 [   64/ 8000]
-loss: 7.558138 [  704/ 8000]
-loss: 6.512156 [ 1344/ 8000]
-loss: 5.550046 [ 1984/ 8000]
-loss: 7.068350 [ 2624/ 8000]
-loss: 6.254210 [ 3264/ 8000]
-loss: 6.333334 [ 3904/ 8000]
-loss: 6.672968 [ 4544/ 8000]
-loss: 6.011800 [ 5184/ 8000]
-loss: 6.281922 [ 5824/ 8000]
-loss: 5.252160 [ 6464/ 8000]
-loss: 5.972773 [ 7104/ 8000]
-loss: 5.569077 [ 7744/ 8000]
-Avg Loss: 5.857892
+loss: 11.559361 [   64/ 8000]
+loss: 10.150082 [  704/ 8000]
+loss: 12.431366 [ 1344/ 8000]
+loss: 8.781148 [ 1984/ 8000]
+loss: 11.217168 [ 2624/ 8000]
+loss: 8.060587 [ 3264/ 8000]
+loss: 9.669640 [ 3904/ 8000]
+loss: 9.624810 [ 4544/ 8000]
+loss: 9.808482 [ 5184/ 8000]
+loss: 10.177684 [ 5824/ 8000]
+loss: 8.251064 [ 6464/ 8000]
+loss: 7.369075 [ 7104/ 8000]
+loss: 8.711451 [ 7744/ 8000]
+Avg Loss: 9.769837
 
 Epoch 2
 ------------------
-loss: 4.593849 [   64/ 8000]
-loss: 6.697829 [  704/ 8000]
-loss: 5.681279 [ 1344/ 8000]
-loss: 4.791214 [ 1984/ 8000]
-loss: 5.994133 [ 2624/ 8000]
-loss: 5.362798 [ 3264/ 8000]
-loss: 5.297074 [ 3904/ 8000]
-loss: 5.547976 [ 4544/ 8000]
-loss: 4.942132 [ 5184/ 8000]
-loss: 4.995830 [ 5824/ 8000]
-loss: 4.198215 [ 6464/ 8000]
-loss: 4.676771 [ 7104/ 8000]
-loss: 4.366837 [ 7744/ 8000]
-Avg Loss: 4.493579
+loss: 10.468843 [   64/ 8000]
+loss: 9.218903 [  704/ 8000]
+loss: 11.100779 [ 1344/ 8000]
+loss: 7.746999 [ 1984/ 8000]
+loss: 9.873242 [ 2624/ 8000]
+loss: 7.149283 [ 3264/ 8000]
+loss: 8.435396 [ 3904/ 8000]
+loss: 8.367870 [ 4544/ 8000]
+loss: 8.155600 [ 5184/ 8000]
+loss: 8.412899 [ 5824/ 8000]
+loss: 6.608739 [ 6464/ 8000]
+loss: 5.931441 [ 7104/ 8000]
+loss: 6.928466 [ 7744/ 8000]
+Avg Loss: 7.608491
 
 Epoch 3
 ------------------
-loss: 3.628562 [   64/ 8000]
-loss: 5.131055 [  704/ 8000]
-loss: 4.146622 [ 1344/ 8000]
-loss: 3.396595 [ 1984/ 8000]
-loss: 4.028492 [ 2624/ 8000]
-loss: 3.745448 [ 3264/ 8000]
-loss: 3.482335 [ 3904/ 8000]
-loss: 3.576678 [ 4544/ 8000]
-loss: 3.107245 [ 5184/ 8000]
-loss: 2.927510 [ 5824/ 8000]
-loss: 2.533787 [ 6464/ 8000]
-loss: 2.630936 [ 7104/ 8000]
-loss: 2.594630 [ 7744/ 8000]
-Avg Loss: 2.529012
+loss: 7.947855 [   64/ 8000]
+loss: 7.037781 [  704/ 8000]
+loss: 8.046132 [ 1344/ 8000]
+loss: 5.375796 [ 1984/ 8000]
+loss: 6.869387 [ 2624/ 8000]
+loss: 4.945308 [ 3264/ 8000]
+loss: 5.555494 [ 3904/ 8000]
+loss: 5.423590 [ 4544/ 8000]
+loss: 4.637858 [ 5184/ 8000]
+loss: 4.751605 [ 5824/ 8000]
+loss: 3.392872 [ 6464/ 8000]
+loss: 2.943655 [ 7104/ 8000]
+loss: 3.505284 [ 7744/ 8000]
+Avg Loss: 3.615225
 
 Epoch 4
 ------------------
-loss: 2.220653 [   64/ 8000]
-loss: 2.848730 [  704/ 8000]
-loss: 2.130622 [ 1344/ 8000]
-loss: 1.705244 [ 1984/ 8000]
-loss: 1.762509 [ 2624/ 8000]
-loss: 1.957887 [ 3264/ 8000]
-loss: 1.728549 [ 3904/ 8000]
-loss: 1.747250 [ 4544/ 8000]
-loss: 1.522444 [ 5184/ 8000]
-loss: 1.378201 [ 5824/ 8000]
-loss: 1.367811 [ 6464/ 8000]
-loss: 1.194838 [ 7104/ 8000]
-loss: 1.488245 [ 7744/ 8000]
-Avg Loss: 1.383161
+loss: 3.360711 [   64/ 8000]
+loss: 3.129750 [  704/ 8000]
+loss: 3.220852 [ 1344/ 8000]
+loss: 2.028703 [ 1984/ 8000]
+loss: 2.811476 [ 2624/ 8000]
+loss: 2.152989 [ 3264/ 8000]
+loss: 2.169516 [ 3904/ 8000]
+loss: 2.104460 [ 4544/ 8000]
+loss: 1.674014 [ 5184/ 8000]
+loss: 1.971039 [ 5824/ 8000]
+loss: 1.329351 [ 6464/ 8000]
+loss: 1.101499 [ 7104/ 8000]
+loss: 1.521148 [ 7744/ 8000]
+Avg Loss: 1.489543
 
 Epoch 5
 ------------------
-loss: 1.386802 [   64/ 8000]
-loss: 1.463986 [  704/ 8000]
-loss: 1.139213 [ 1344/ 8000]
-loss: 0.983471 [ 1984/ 8000]
-loss: 0.841175 [ 2624/ 8000]
-loss: 1.235995 [ 3264/ 8000]
-loss: 1.212063 [ 3904/ 8000]
-loss: 1.196411 [ 4544/ 8000]
-loss: 1.063424 [ 5184/ 8000]
-loss: 1.051633 [ 5824/ 8000]
-loss: 1.127206 [ 6464/ 8000]
-loss: 0.833066 [ 7104/ 8000]
-loss: 1.255609 [ 7744/ 8000]
-Avg Loss: 1.170692
+loss: 1.216901 [   64/ 8000]
+loss: 1.191105 [  704/ 8000]
+loss: 1.300725 [ 1344/ 8000]
+loss: 0.935616 [ 1984/ 8000]
+loss: 1.545732 [ 2624/ 8000]
+loss: 1.388198 [ 3264/ 8000]
+loss: 1.273956 [ 3904/ 8000]
+loss: 1.170510 [ 4544/ 8000]
+loss: 1.217884 [ 5184/ 8000]
+loss: 1.544257 [ 5824/ 8000]
+loss: 1.180285 [ 6464/ 8000]
+loss: 0.944844 [ 7104/ 8000]
+loss: 1.244212 [ 7744/ 8000]
+Avg Loss: 1.219065
 
 Done!</code></pre>
 </div>

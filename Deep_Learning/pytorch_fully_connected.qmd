@@ -67,7 +67,7 @@ In the last step, I have to call `unsqueeze()` on `y_noisy` to ensure it's forma
 
 ### Process Data
 
-Here, I'll create a `[Dataset](https://pytorch.org/docs/stable/data.html)` using `X` and `y_noisy`, then I'll do some train/test split stuff and create a `[Dataloader](https://pytorch.org/docs/stable/data.html)` for the train and test sets.
+Here, I'll create a [Dataset](https://pytorch.org/docs/stable/data.html) using `X` and `y_noisy`, then I'll do some train/test split stuff and create a [Dataloader](https://pytorch.org/docs/stable/data.html) for the train and test sets.
 
 I should probably create a set of notes on datasets and dataloaders in PyTorch, but for now we'll just say that dataloaders are utility tools that help feed data into PyTorch models in batches. These are usually useful when we're working with big data that we can't (or don't want to) process all at once.
 
