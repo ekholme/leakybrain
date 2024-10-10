@@ -1,8 +1,43 @@
 [
   {
-    "listing": "/linux.html",
+    "listing": "/python.html",
     "items": [
-      "/Linux/install_programs.html"
+      "/Python/polars_cheat_sheet.html",
+      "/Python/py_pkg_dev.html",
+      "/Python/vertex_ai_textgen.html",
+      "/Python/basics_classes.html",
+      "/Python/sklearn_pipeline.html",
+      "/Python/venv.html"
+    ]
+  },
+  {
+    "listing": "/gcp.html",
+    "items": [
+      "/GCP/ci_cd_cloudrun.html",
+      "/GCP/gcloud_cli_commands.html"
+    ]
+  },
+  {
+    "listing": "/databases.html",
+    "items": [
+      "/Databases/sqlite.html"
+    ]
+  },
+  {
+    "listing": "/deep_learning.html",
+    "items": [
+      "/Deep_Learning/deep_learning_glossary.html",
+      "/Deep_Learning/pytorch_fully_connected.html",
+      "/Deep_Learning/overview.html"
+    ]
+  },
+  {
+    "listing": "/go.html",
+    "items": [
+      "/Go/test_http_server.html",
+      "/Go/parse_query_params.html",
+      "/Go/post_request_validation.html",
+      "/Go/interface_composition.html"
     ]
   },
   {
@@ -17,49 +52,15 @@
     ]
   },
   {
-    "listing": "/go.html",
+    "listing": "/linux.html",
     "items": [
-      "/Go/test_http_server.html",
-      "/Go/parse_query_params.html",
-      "/Go/post_request_validation.html",
-      "/Go/interface_composition.html"
-    ]
-  },
-  {
-    "listing": "/deep_learning.html",
-    "items": [
-      "/Deep_Learning/deep_learning_glossary.html",
-      "/Deep_Learning/pytorch_fully_connected.html",
-      "/Deep_Learning/overview.html"
-    ]
-  },
-  {
-    "listing": "/databases.html",
-    "items": [
-      "/Databases/sqlite.html"
-    ]
-  },
-  {
-    "listing": "/gcp.html",
-    "items": [
-      "/GCP/ci_cd_cloudrun.html",
-      "/GCP/gcloud_cli_commands.html"
-    ]
-  },
-  {
-    "listing": "/python.html",
-    "items": [
-      "/Python/polars_cheat_sheet.html",
-      "/Python/py_pkg_dev.html",
-      "/Python/vertex_ai_textgen.html",
-      "/Python/basics_classes.html",
-      "/Python/sklearn_pipeline.html",
-      "/Python/venv.html"
+      "/Linux/install_programs.html"
     ]
   },
   {
     "listing": "/r.html",
     "items": [
+      "/R/read_query_sql.html",
       "/R/color_text_ggplot.html",
       "/R/base_match.html",
       "/R/s3.html",

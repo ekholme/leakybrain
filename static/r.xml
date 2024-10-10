@@ -10,7 +10,92 @@
 <atom:link href="https://leakybrain.ericekholm.com/r.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.5.54</generator>
-<lastBuildDate>Wed, 22 May 2024 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 09 Oct 2024 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Read a Query from .sql File</title>
+  <dc:creator>Eric Ekholm</dc:creator>
+  <link>https://leakybrain.ericekholm.com/R/read_query_sql.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>So, I typically write SQL queries directly in R as strings because I often want to pass function arguments to them, e.g.</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">make_query <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">function</span>(year) {</span>
+<span id="cb1-2">    ret <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">paste</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"SELECT * FROM my_table WHERE year = "</span> year)</span>
+<span id="cb1-3">    <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">return</span>(ret)</span>
+<span id="cb1-4">} </span></code></pre></div>
+<p>But sometimes I find it easier to just write a canned query in a <code>.sql</code> file, often when I’m using that query in another non-R program, or when I need one “true” query that gets passed around to various other applications. If we need to read this into R, we just need a combination of <code>paste()</code> and <code>readLines()</code>.</p>
+<p>Imagine we have the following query in <code>my_query.sql</code></p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">SELECT</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span></span>
+<span id="cb2-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">FROM</span> my_table</span></code></pre></div>
+<p>And then we want to read that query in and execute it in R. We would just do:</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(DBI)</span>
+<span id="cb3-2"></span>
+<span id="cb3-3">con <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dbConnect</span>(</span>
+<span id="cb3-4">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#specify arguments here to connect to your DB</span></span>
+<span id="cb3-5">)</span>
+<span id="cb3-6"></span>
+<span id="cb3-7">qry <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">paste</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">readLines</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"my_query.sql"</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">collapse =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb3-8"></span>
+<span id="cb3-9">res <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dbGetQuery</span>(con, qry)</span></code></pre></div>
+<p>And that will do it!</p>
+
+
+
+ ]]></description>
+  <guid>https://leakybrain.ericekholm.com/R/read_query_sql.html</guid>
+  <pubDate>Wed, 09 Oct 2024 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Adding Colored Text to ggplot</title>
   <dc:creator>Eric Ekholm</dc:creator>

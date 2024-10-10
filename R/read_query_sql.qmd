@@ -1,0 +1,45 @@
+---
+title: "Read a Query from .sql File"
+description: |
+  A minimal example showing how to read the contents of an .sql file and execute the query from R
+date: 2024-10-09
+format:
+  html:
+    code-fold: false
+execute: 
+  warning: false
+---
+
+So, I typically write SQL queries directly in R as strings because I often want to pass function arguments to them, e.g.
+
+```r
+make_query <- function(year) {
+    ret <- paste("SELECT * FROM my_table WHERE year = " year)
+    return(ret)
+} 
+```
+
+But sometimes I find it easier to just write a canned query in a `.sql` file, often when I'm using that query in another non-R program, or when I need one "true" query that gets passed around to various other applications. If we need to read this into R, we just need a combination of `paste()` and `readLines()`.
+
+Imagine we have the following query in `my_query.sql`
+
+```sql
+SELECT *
+FROM my_table
+```
+
+And then we want to read that query in and execute it in R. We would just do:
+
+```r
+library(DBI)
+
+con <- dbConnect(
+    #specify arguments here to connect to your DB
+)
+
+qry <- paste(readLines("my_query.sql"), collapse = "\n")
+
+res <- dbGetQuery(con, qry)
+```
+
+And that will do it!
