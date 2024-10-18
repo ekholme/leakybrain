@@ -8,9 +8,9 @@
 
 <meta name="author" content="Eric Ekholm">
 <meta name="dcterms.date" content="2024-10-18">
-<meta name="description" content="How to initialize a vector of structs in Julia">
+<meta name="description" content="Illustrated using Julia">
 
-<title>Inititializing a Vector of Structs – leakybrain</title>
+<title>Bootstrapping – leakybrain</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -211,10 +211,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#load-pkgs-and-define-struct" id="toc-load-pkgs-and-define-struct" class="nav-link active" data-scroll-target="#load-pkgs-and-define-struct">Load Pkgs and Define Struct</a></li>
-  <li><a href="#create-a-constructor" id="toc-create-a-constructor" class="nav-link" data-scroll-target="#create-a-constructor">Create a Constructor</a></li>
-  <li><a href="#create-an-empty-n-vector-then-populate-it" id="toc-create-an-empty-n-vector-then-populate-it" class="nav-link" data-scroll-target="#create-an-empty-n-vector-then-populate-it">Create an Empty n-vector, then Populate It</a></li>
-  <li><a href="#check-results" id="toc-check-results" class="nav-link" data-scroll-target="#check-results">Check Results</a></li>
+  <li><a href="#what-is-bootstrapping" id="toc-what-is-bootstrapping" class="nav-link active" data-scroll-target="#what-is-bootstrapping">What is Bootstrapping</a></li>
+  <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How It Works</a></li>
+  <li><a href="#implementation" id="toc-implementation" class="nav-link" data-scroll-target="#implementation">Implementation</a></li>
   </ul>
 </nav>
     </div>
@@ -223,12 +222,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Inititializing a Vector of Structs</h1>
+<h1 class="title">Bootstrapping</h1>
 </div>
 
 <div>
   <div class="description">
-    <p>How to initialize a vector of structs in Julia</p>
+    <p>Illustrated using Julia</p>
   </div>
 </div>
 
@@ -257,77 +256,71 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Here’s an example of how to initialize a vector of structs in Julia. It’s sometimes useful to coerce other data structures into vectors of structs to perform operations on them, and so this snippet provides a basic example of creating and populating a vector of a custom struct</p>
-<section id="load-pkgs-and-define-struct" class="level1">
-<h1>Load Pkgs and Define Struct</h1>
-<div class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Random</span> <span class="co">#for creating data</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#define struct</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">mutable struct</span> MyType</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  x<span class="op">::</span><span class="dt">String</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  y<span class="op">::</span><span class="dt">Int64</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  z<span class="op">::</span><span class="dt">Vector{Float64}</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#instantiate an example struct</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> <span class="fu">MyType</span>(<span class="st">"hello"</span>, <span class="fl">1</span>, [<span class="fl">1</span>., <span class="fl">1.5</span>, <span class="fl">104.1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>MyType("hello", 1, [1.0, 1.5, 104.1])</code></pre>
-</div>
-</div>
+<section id="what-is-bootstrapping" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-bootstrapping">What is Bootstrapping</h2>
+<p><a href="https://en.wikipedia.org/wiki/Bootstrapping_(statistics)">Bootstrapping</a> is a method for estimating the properties of some quantity – like its expected value, its variance, etc – using resampling with replacement.</p>
+<p>Basically the idea is that, when we have a sample, we can estimate quantities (e.g.&nbsp;the mean) from that sample. But we know that the sample isn’t going to be a perfect representation of the population, and that if we obtained data from multiple samples, our estimate of the mean (or whatever other quantity) would differ. Bootstrapping gives us a tool to estimate this variability in our quantity of interest without having to collect multiple samples.</p>
+<p>It can be a nice approach for obtaining (more) stable estimates with small data sets, with datasets that are non-normal, or with data where outliers might bias the estimates. A benefit of bootstrapping is that it makes no assumptions about the distribution of your data, hence its robustness to outliers, small data, non-normality, etc.</p>
 </section>
-<section id="create-a-constructor" class="level1">
-<h1>Create a Constructor</h1>
-<p>This isn’t strictly necessary, but it can be useful. This just creates a new instance of MyType with random values</p>
-<div class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">MyType</span>()</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">MyType</span>(<span class="fu">randstring</span>(<span class="fl">10</span>), <span class="fu">rand</span>(<span class="fl">1</span><span class="op">:</span><span class="fl">100</span>), <span class="fu">rand</span>(<span class="dt">Float64</span>, <span class="fl">3</span>))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> <span class="fu">MyType</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>MyType("WAc1LBvkFm", 33, [0.3619946274985777, 0.858479824777187, 0.720193448993144])</code></pre>
-</div>
-</div>
+<section id="how-it-works" class="level2">
+<h2 class="anchored" data-anchor-id="how-it-works">How It Works</h2>
+<p>Bootstrapping works by resampling <em>with replacement</em> from a sample, estimating the quantity of interest, and then repeating this process lots of times – often 1,000 or more. After all of these repetitions, we then have a distribution of the quantity of interest, so we can get a sense of its expected value as well as its standard error. This approach lends itself well to constructing confidence intervals, too.</p>
+<p>The general process is:</p>
+<ol type="1">
+<li>If you have a dataset <em>x</em> (vector, matrix, whatever) with <em>i</em> observations, resample <em>i</em> observations with replacement from <em>x</em>. Note that you don’t have to retain <em>i</em> samples in your new sample, but it’s kind of the default approach.</li>
+<li>Estimate your quantity of interest (e.g.&nbsp;mean, quantile, regression coefficient, whatever) on your resampled dataset.</li>
+<li>Repeat the process <em>n</em> times, where <em>n</em> is a fairly large number (usually at least 1,000).</li>
+<li>Use your <em>n</em> estimates as the distribution of your quantity. You can use this to calculate the mean, standard error, confidence intervals, etc.</li>
+</ol>
 </section>
-<section id="create-an-empty-n-vector-then-populate-it" class="level1">
-<h1>Create an Empty n-vector, then Populate It</h1>
-<div class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="fl">100</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#initialize an n-vector with 0 values</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>v <span class="op">=</span> <span class="fu">Vector</span><span class="dt">{MyType}</span>(<span class="cn">undef</span>, n)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#populate the vector</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="op">∈</span> <span class="fu">eachindex</span>(v)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    v[i] <span class="op">=</span> <span class="fu">MyType</span>()</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="check-results" class="level1">
-<h1>Check Results</h1>
-<p>we want v to be a vector of MyType</p>
-<div class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">typeof</span>(v)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<div class="ansi-escaped-output">
-<pre>Vector{MyType}<span class="ansi-bright-black-fg"> (alias for </span><span class="ansi-bright-black-fg">Array{MyType, 1}</span><span class="ansi-bright-black-fg">)</span></pre>
-</div>
-</div>
-</div>
-<p>and we want each element to be MyType</p>
-<div class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">typeof</span>(v[<span class="fl">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
-<pre><code>MyType</code></pre>
-</div>
-</div>
-<p>and let’s check the first element</p>
-<div class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>v[<span class="fl">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
-<pre><code>MyType("HmSiEUvtnk", 24, [0.22658234942156086, 0.5284152678374769, 0.48072129238569283])</code></pre>
+<section id="implementation" class="level2">
+<h2 class="anchored" data-anchor-id="implementation">Implementation</h2>
+<p>Below is a basic demonstration (in Julia) of bootstrapping to estimate various percentiles of a distribution.</p>
+<div id="2" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Distributions</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Random</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="bu">Random</span>.<span class="fu">seed!</span>(<span class="fl">0408</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#generate some data</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>u <span class="op">=</span> <span class="fu">Uniform</span>(<span class="fl">0</span>, <span class="fl">1</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="fl">1_000</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>v <span class="op">=</span> <span class="fu">rand</span>(u, n)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#define the percentiles I'm interested in</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>qs <span class="op">=</span> [<span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>]</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># write a function to bootstrap these quantiles</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">boot_quants</span>(x<span class="op">::</span><span class="dt">Vector{Float64}</span>, quants<span class="op">::</span><span class="dt">Vector{Float64}</span>, nboot<span class="op">::</span><span class="dt">Int</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    qlen <span class="op">=</span> <span class="fu">length</span>(quants)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    x_size <span class="op">=</span> <span class="fu">length</span>(x)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    outvec <span class="op">=</span> [<span class="fu">Vector</span><span class="dt">{Float64}</span>(<span class="cn">undef</span>, qlen) for _ <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>nboot]</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="op">∈</span> <span class="fu">eachindex</span>(outvec)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        s <span class="op">=</span> <span class="fu">sample</span>(x, x_size, replace<span class="op">=</span><span class="cn">true</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        outvec[i] <span class="op">=</span> <span class="fu">quantile</span>(s, quants)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> <span class="fu">hcat</span>(outvec<span class="op">...</span>)<span class="ch">'</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co"># run the function</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> <span class="fu">boot_quants</span>(v, qs, n)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co">#estimate the expected value of each quantile</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="co">#but note that we could construct confidence intervals or estimate other quantities as well if we wanted</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>ev_quantiles <span class="op">=</span> <span class="fu">mean</span>.(<span class="fu">eachcol</span>(res))</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>ev_quantiles</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>5-element Vector{Float64}:
+ 0.10801858903776344
+ 0.24944167231770148
+ 0.5012088237766292
+ 0.755182927580556
+ 0.8944670802362316</code></pre>
 </div>
 </div>
 
