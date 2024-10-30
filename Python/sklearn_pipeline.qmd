@@ -7,7 +7,7 @@ format:
   html:
     code-fold: false
 execute:
-  freeze: true
+  freeze: auto
 jupyter: python3
 ---
 
@@ -41,9 +41,6 @@ penguins_complete = penguins_complete.with_columns(pl.all().fill_null(np.nan))
 # separate into X and y
 y = penguins_complete["body_mass_g"]
 X = penguins_complete.select(pl.exclude("body_mass_g"))
-
-# coerce X to pandas since polars dfs don't seem to be supported for all of the sklearn steps yet
-X = X.to_pandas()
 
 # train test split
 X_trn, X_tst, y_trn, y_tst = train_test_split(X, y, random_state=408)
